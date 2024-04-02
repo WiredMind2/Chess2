@@ -31,4 +31,10 @@ Il faut bien retenir pour le mouvement de la tour que la tour doit toujours ress
 ### Déplacement du fou
 Le fou, contrairement à la tour, traverse les cases en y rentrant par un sommet et en ressortant par le sommet opposé. Chaque case affranchie est de la même couleur que la précédente. Fait intéressant, le fou possède 4 directions différentes au lieu de deux en échec classique à l'exception des cases centrales (I5 - I9 - E9 - E4 - D4 et D5) où il a 5 options. 
 
+https://3-chess.com/learn/piece/bishop
+https://fr.wikipedia.org/wiki/%C3%89checs_Yalta
+https://www.ymimports.com/pages/how-to-play-three-player-chess
+https://chessforsharks.co/three-player-chess/
+
+
 
