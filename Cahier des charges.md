@@ -26,3 +26,9 @@ Le vainqueur est celui qui met en position d'échec et mat un des deux rois adve
 
 ## Mouvement des différentes pièces
 ### Déplacement de la tour
+Il faut bien retenir pour le mouvement de la tour que la tour doit toujours ressortir d'une case par le côté opposé d'où elle est entrée. Elle ne peut également pas franchir une case occupée par une pièce ou un pion.
+
+### Déplacement du fou
+Le fou, contrairement à la tour, traverse les cases en y rentrant par un sommet et en ressortant par le sommet opposé. Chaque case affranchie est de la même couleur que la précédente. Fait intéressant, le fou possède 4 directions différentes au lieu de deux en échec classique à l'exception des cases centrales (I5 - I9 - E9 - E4 - D4 et D5) où il a 5 options. 
+
+
