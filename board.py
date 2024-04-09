@@ -23,7 +23,6 @@ class Board(Movement):
 				for j, p in enumerate(row):
 					self.board[start - i][j] = (p, team)
 		
-		print(self.board)
 
 	def get(self, i, j):
 		return self.board[i][j]
@@ -148,6 +147,8 @@ if __name__ == '__main__':
 	print(dict(b.get_adjacent('e5')))
 	print(b.get_type('e2'))
 	print(b.mouvement_pion_possible('e2'))  
+
+	print(list(b.get_adjacent_diagonale('e4')))  
 	assert b.coords_to_index('e8') == b.coords_to_index('i8')
 	assert b.coords_to_index('i9') == b.coords_to_index('d9')
 	assert b.coords_to_index('a9') == b.coords_to_index('l9')
