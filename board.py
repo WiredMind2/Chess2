@@ -1,5 +1,5 @@
 import string
-from constants import BOARD_SIZE, START_ROWS
+from constants import BOARD_SIZE, START_ROWS, Dir
 from mouv import Movement
 
 class Board(Movement):
@@ -15,7 +15,7 @@ class Board(Movement):
 		# White
 		for i, row in enumerate(START_ROWS):
 			for j, p in enumerate(row):
-				self.board[i][j] = (p, 'W')
+				self.board[i][j] = (p, Dir.RIGHT)
 
 		# Black and red, reversed
 		for start, team in [(7, 'B'), (11, 'R')]:
@@ -80,7 +80,7 @@ class Board(Movement):
 
 	def get_adjacent(self, coords):
 		x, y = self.coords_to_index(coords)
-		for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+		for dir, (dx, dy) in [(Dir.DOWN, (-1, 0)), (Dir.UP, (1, 0)), (Dir.LEFT, (0, -1)), (Dir.RIGHT, (0, 1))]:
 			nx, ny = x+dx, y+dy
   
 			# region: bounds
@@ -141,17 +141,17 @@ class Board(Movement):
 			# endregion
 
 			out = self.index_to_coords(nx, ny)
-			yield out
+			yield (dir, out)
 
 if __name__ == '__main__':
 	b = Board()
-	print(list(b.get_adjacent('e5')))
+	print(dict(b.get_adjacent('e5')))
 	print(b.get_type('e2'))
 	print(b.mouvement_pion_possible('e2'))  
 	assert b.coords_to_index('e8') == b.coords_to_index('i8')
 	assert b.coords_to_index('i9') == b.coords_to_index('d9')
 	assert b.coords_to_index('a9') == b.coords_to_index('l9')
-	assert set(b.get_adjacent('i5')) == {'d5', 'j5', 'i9', 'i6'}
-	assert set(b.get_adjacent('i9')) == {'i10', 'j9', 'e9', 'i5'}
-	assert set(b.get_adjacent('e4')) == {'d4', 'f4', 'e3', 'e9'}
+	assert dict(b.get_adjacent('i5')) == {Dir.UP: 'j5', Dir.DOWN: 'd5', Dir.LEFT: 'i9', Dir.RIGHT: 'i6'}
+	assert dict(b.get_adjacent('i9')) == {Dir.UP: 'e9', Dir.DOWN: 'j9', Dir.LEFT: 'i5', Dir.RIGHT: 'i10'}
+	assert dict(b.get_adjacent('e4')) == {Dir.UP: 'f4', Dir.DOWN: 'd4', Dir.LEFT: 'e3', Dir.RIGHT: 'e9'}
 	pass
