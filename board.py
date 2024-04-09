@@ -25,6 +25,9 @@ class Board(Movement):
 		
 		print(self.board)
 
+	def get(self, i, j):
+		return self.board[i][j]
+
 	@classmethod
 	def coords_to_index(cls, coords):
 		x, y = coords[0], coords[1:]
