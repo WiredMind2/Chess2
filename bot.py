@@ -259,7 +259,7 @@ class Bot:
 	def rotate_board(self):
 		if self.team == "W":
 			return self.board.board
-		elif self.team == "B":
+		elif self.team == "B": # TODO
 			return 
 		elif self.team == "R":
 			return 
@@ -268,4 +268,5 @@ if __name__ == "__main__":
 	from board import Board
 	board = Board()
 	bot = Bot(board, 'W')
+	
 	bot.get_move()
