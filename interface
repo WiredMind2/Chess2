@@ -33,7 +33,10 @@ nouvelle_image = pygame.transform.scale(image, (new_width, new_height))
 x = (width - new_width) // 2
 y = (height - new_height) // 2
 
-
+#equation de cercle première ligne du bas : (x+5,71)**2 + (y+834,38)**2 = 383679,68 
+#eq 2ème ligne : (x-2,8)**2 +(y+387,88)**2 = 66755,15
+#eq 3ème ligne : (x-0,77)**2 + (y+464,7)**2 = 87187,35
+#coeff directeur segment 4ème ligne : delta = 0,5225
 
 # Boucle principale
 running = True
