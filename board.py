@@ -1,16 +1,17 @@
 import string
 from constants import BOARD_SIZE, START_ROWS
+from mouv import Movement
 
-
-class Board:
+class Board(Movement):
 	"""Représente le plateau de jeu, avec les positions de chaque pion.
 	"""
 	def __init__(self):
+		super().__init__()
 		self.reset()
 
 	def reset(self):
-		self.board = [[None for _ in range(BOARD_SIZE)] for _ in range(int(BOARD_SIZE * 1.5))] # Number, then letter -> /!\ reversed
-
+		self.board = [[None for _ in range(BOARD_SIZE)] for _ in range(int(BOARD_SIZE * 1.5))] # Number, then letter -> /!\ reverse
+		
 		# White
 		for i, row in enumerate(START_ROWS):
 			for j, p in enumerate(row):
@@ -21,6 +22,8 @@ class Board:
 			for i, row in enumerate(START_ROWS):
 				for j, p in enumerate(row):
 					self.board[start - i][j] = (p, team)
+		
+		print(self.board)
 
 	@classmethod
 	def coords_to_index(cls, coords):
@@ -33,31 +36,33 @@ class Board:
 		elif x >= 8 and 4 <= y <= 8: # Black
 			x = x - 4 # ijkl => efgh
 
-		return x, y
+		return x, y # x= lettre, y = chiffre
 
 	@classmethod
 	def index_to_coords(cls, x, y):
+		
 		if y <= 3:
 			# White zone
-			pass # Don't change anything
+			pass  # Don't change anything
 		elif y <= 7:
 			# Black zone
 			if x <= 3:
 				# White side
-				pass # Don't change anything
+				pass  # Don't change anything
 			else:
 				# Red side
-				x = x + 4 # efgh => ijkl
+				x = x + 4  # efgh => ijkl
 		else:
 			# Red zone
 			if x <= 3:
 				# Black side
-				x = 11 - x # abcd => lkji
+				x = 11 - x  # abcd => lkji
 			else:
 				# White side
-				pass # Don't change anything
-		
+				pass  # Don't change anything
+	
 		return ''.join((string.ascii_lowercase[x], str(y+1)))
+
 
 	def __getitem__(self, coords):
 		""" val = dico['e5'] """
@@ -74,7 +79,7 @@ class Board:
 		x, y = self.coords_to_index(coords)
 		for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
 			nx, ny = x+dx, y+dy
-
+  
 			# region: bounds
    
 			if not (0 <= x < 8):
@@ -135,9 +140,11 @@ class Board:
 			out = self.index_to_coords(nx, ny)
 			yield out
 
-
 if __name__ == '__main__':
 	b = Board()
+	print(list(b.get_adjacent('e5')))
+	print(b.get_type('e2'))
+	print(b.mouvement_pion_possible('e2'))  
 	assert b.coords_to_index('e8') == b.coords_to_index('i8')
 	assert b.coords_to_index('i9') == b.coords_to_index('d9')
 	assert b.coords_to_index('a9') == b.coords_to_index('l9')
