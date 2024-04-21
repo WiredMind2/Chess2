@@ -1,5 +1,5 @@
 import string
-from constants import BOARD_SIZE, START_ROWS, Dir
+from constants import BOARD_SIZE, START_ROWS, Dir, Piece
 from mouv import Movement
 
 class Board(Movement):
@@ -11,17 +11,17 @@ class Board(Movement):
 
 	def reset(self):
 		self.board = [[None for _ in range(BOARD_SIZE)] for _ in range(int(BOARD_SIZE * 1.5))] # Number, then letter -> /!\ reverse
-		
+
 		# White
 		for i, row in enumerate(START_ROWS):
 			for j, p in enumerate(row):
-				self.board[i][j] = (p, Dir.RIGHT)
+				self.board[i][j] = Piece.from_name(p)('W', (i, j), self)
 
 		# Black and red, reversed
 		for start, team in [(7, 'B'), (11, 'R')]:
 			for i, row in enumerate(START_ROWS):
 				for j, p in enumerate(row):
-					self.board[start - i][j] = (p, team)
+					self.board[start - i][j] = Piece.from_name(p)(team, (i, j), self)
 		
 
 	def get(self, i, j):
@@ -77,73 +77,9 @@ class Board(Movement):
 		x, y = self.coords_to_index(coords)
 		self.board[y][x] = value
 
-	def get_adjacent(self, coords):
-		x, y = self.coords_to_index(coords)
-		for dir, (dx, dy) in [(Dir.DOWN, (-1, 0)), (Dir.UP, (1, 0)), (Dir.LEFT, (0, -1)), (Dir.RIGHT, (0, 1))]:
-			nx, ny = x+dx, y+dy
-  
-			# region: bounds
-   
-			if not (0 <= x < 8):
-				# Out of bounds
-				continue
-			
-			if y == 0 and dy == -1:
-				# Out of bounds, behind white
-				continue
-
-			if y == 7 and dy == 1:
-				# Out of bounds, behind black
-				continue
-
-			if y == 11 and dy == 1:
-				# Out of bounds, behind red
-				continue
-
-			# endregion
-
-			# region: Red borders
-
-			if y == 8 and dy == -1:
-				# Red zone outer border
-				if 4 <= x:
-					# White side
-					ny = 3
-				else:
-					# Black side
-					nx, ny = 7-nx, 4
-
-			if y >= 8:
-				# Red zone inner border
-				if x == 4 and dx == -1: # == e
-					# White side
-					nx = 8
-				elif x == 8 and dx == 1:
-					# Black side
-					nx = 4
-
-			# endregion
-
-			# region: White border
-			if y == 3 and x >= 4 and dy == 1:
-				# Red side
-				ny += 4
-
-			# endregion
-
-			# region: Black border
-			if y == 4 and x >= 4 and dy == -1:
-				# Red side
-				ny = 8
-				nx = 7-nx
-
-			# endregion
-
-			out = self.index_to_coords(nx, ny)
-			yield (dir, out)
-
 if __name__ == '__main__':
 	b = Board()
+	print(b.board)
 	print(dict(b.get_adjacent('e5')))
 	print(b.get_type('e2'))
 	print(b.mouvement_pion_possible('e2'))  

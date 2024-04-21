@@ -66,7 +66,6 @@ class Bot:
 
 		while not self.engine_ready[side]:
 			self.parse_commands(side=side)
-   
 
 	def parse_commands(self, iterate=False, side=None):
 		def iterator():
@@ -231,7 +230,7 @@ class Bot:
 					if spaces > 0:
 						board_repr += str(spaces)
 						spaces = 0
-					piece, p_team = cell
+					piece, p_team = cell.type[0], cell.team
 					if p_team == self.team:
 						piece = piece.upper()
 					else:
