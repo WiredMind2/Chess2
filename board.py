@@ -79,12 +79,8 @@ class Board(Movement):
 
 if __name__ == '__main__':
 	b = Board()
-	print(b.board)
-	print(dict(b.get_adjacent('e5')))
-	print(b.get_type('e2'))
-	print(b.mouvement_pion_possible('e2'))  
-
-	print(list(b.get_adjacent_diagonale('e4')))  
+	#print(b.board)
+	print(b.mouvement_pion_possible('j5'))
 	assert b.coords_to_index('e8') == b.coords_to_index('i8')
 	assert b.coords_to_index('i9') == b.coords_to_index('d9')
 	assert b.coords_to_index('a9') == b.coords_to_index('l9')

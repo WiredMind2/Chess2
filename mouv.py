@@ -35,30 +35,63 @@ class Movement:
 
 	def mouvement_pion_possible(self,coord):
 		mouvement_dispo = []
-		mouvement_dispo_potentiel = self.mouvement_possible['P']
-
-		if coord[1] == '2' or coord[1] == '7' or coord[1] == '11':
-			mouvement_dispo_potentiel.append((2,0))
-
-		coord_test = mouvement_dispo_potentiel[0]
+		case_adjcante = dict(self.get_adjacent(coord))
 		x,y = self.coords_to_index(coord)
-		x -= coord_test[0]
-		y += coord_test[1]
-
-		if self.board[y][x] == None and (x>-1 and x<12) and (y>-1 and y<12):
-			mouvement_dispo.append(coord_test)
-
-		for i in range(1,len(mouvement_dispo_potentiel)):
-			coord_test = mouvement_dispo_potentiel[i]
-			x,y = self.coords_to_index(coord)
-			x -= coord_test[0]
-			y += coord_test[1]
-
+		if self.board[y][x] != None and self.board[y][x].team == 'W':
+			x,y = self.coords_to_index(case_adjcante[Dir.RIGHT])
 			if self.board[y][x] == None and (x>-1 and x<12) and (y>-1 and y<12):
-				mouvement_dispo.append(coord_test)
-
-		return mouvement_dispo
-
+				mouvement_dispo.append(case_adjcante[Dir.RIGHT])
+				case_adjcante3 = dict(self.get_adjacent(case_adjcante[Dir.RIGHT]))
+				x,y = self.coords_to_index(case_adjcante3[Dir.RIGHT])
+				if self.board[y][x] == None and (x>-1 and x<12) and (y>-1 and y<12):
+					mouvement_dispo.append(case_adjcante3[Dir.RIGHT])
+			
+			case_adjcante2 = dict(self.get_adjacent(case_adjcante[Dir.RIGHT]))
+			x,y = self.coords_to_index(case_adjcante2[Dir.UP])
+			if self.board[y][x] != None and (x>-1 and x<12) and (y>-1 and y<12):
+				mouvement_dispo.append(case_adjcante2[Dir.UP])
+			x,y = self.coords_to_index(case_adjcante2[Dir.DOWN])
+			if self.board[y][x] != None and (x>-1 and x<12) and (y>-1 and y<12):
+				mouvement_dispo.append(case_adjcante2[Dir.DOWN])
+			return mouvement_dispo
+		
+		elif self.board[y][x] != None and self.board[y][x].team == 'R':
+			x,y = self.coords_to_index(case_adjcante[Dir.LEFT])
+			if self.board[y][x] == None and (x>-1 and x<12) and (y>-1 and y<12):
+				mouvement_dispo.append(case_adjcante[Dir.LEFT])
+				case_adjcante3 = dict(self.get_adjacent(case_adjcante[Dir.LEFT]))
+				x,y = self.coords_to_index(case_adjcante3[Dir.LEFT])
+				if self.board[y][x] == None and (x>-1 and x<12) and (y>-1 and y<12):
+					mouvement_dispo.append(case_adjcante3[Dir.LEFT])
+			
+			case_adjcante2 = dict(self.get_adjacent(case_adjcante[Dir.LEFT]))
+			x,y = self.coords_to_index(case_adjcante2[Dir.UP])
+			if self.board[y][x] != None and (x>-1 and x<12) and (y>-1 and y<12):
+				mouvement_dispo.append(case_adjcante2[Dir.UP])
+			x,y = self.coords_to_index(case_adjcante2[Dir.DOWN])
+			if self.board[y][x] != None and (x>-1 and x<12) and (y>-1 and y<12):
+				mouvement_dispo.append(case_adjcante2[Dir.DOWN])
+			return mouvement_dispo
+		
+		else:
+			x,y = self.coords_to_index(case_adjcante[Dir.LEFT])
+			if self.board[y][x] == None and (x>-1 and x<12) and (y>-1 and y<12):
+				mouvement_dispo.append(case_adjcante[Dir.LEFT])
+				print(mouvement_dispo)
+				case_adjcante3 = dict(self.get_adjacent(case_adjcante[Dir.LEFT]))
+				print(case_adjcante3)
+				x,y = self.coords_to_index(case_adjcante3[Dir.LEFT])
+				if self.board[y][x] == None and (x>-1 and x<12) and (y>-1 and y<12):
+					mouvement_dispo.append(case_adjcante3[Dir.LEFT])
+			
+			case_adjcante2 = dict(self.get_adjacent(case_adjcante[Dir.LEFT]))
+			x,y = self.coords_to_index(case_adjcante2[Dir.UP])
+			if self.board[y][x] != None and (x>-1 and x<12) and (y>-1 and y<12):
+				mouvement_dispo.append(case_adjcante2[Dir.UP])
+			x,y = self.coords_to_index(case_adjcante2[Dir.DOWN])
+			if self.board[y][x] != None and (x>-1 and x<12) and (y>-1 and y<12):
+				mouvement_dispo.append(case_adjcante2[Dir.DOWN])
+			return mouvement_dispo
 
 	def get_adjacent(self, coords):
 		x, y = self.coords_to_index(coords)
