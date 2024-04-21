@@ -79,9 +79,9 @@ class Board(Movement):
 
 if __name__ == '__main__':
 	b = Board()
-	#print(b.board)
-	print(b.mouvement_pion_possible('d2'))
-	print(dict(b.get_adjacent('j5')))
+	print(b.board)
+	print(b.mouvement_tour_possible('h1'))
+    
 	assert b.coords_to_index('e8') == b.coords_to_index('i8')
 	assert b.coords_to_index('i9') == b.coords_to_index('d9')
 	assert b.coords_to_index('a9') == b.coords_to_index('l9')
