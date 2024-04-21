@@ -86,7 +86,7 @@ class Movement:
 
 			return mouvement_dispo
 
-		elif self.board[y][x] != None and self.board[y][x].team == "R":
+		if self.board[y][x] != None and self.board[y][x].team == "R":
 			x, y = self.coords_to_index(case_adjcante[Dir.LEFT])
 			if self.board[y][x] == None and (x > -1 and x < 12) and (y > -1 and y < 12):
 				mouvement_dispo.append(case_adjcante[Dir.LEFT])
@@ -107,6 +107,10 @@ class Movement:
 			if self.board[y][x] != None and (x > -1 and x < 12) and (y > -1 and y < 12):
 				mouvement_dispo.append(case_adjcante2[Dir.DOWN])
 			return mouvement_dispo
+		
+		if self.board[y][x] != None and self.board[y][x].team == 'B':
+			x,y = self.coords_to_index(case_adjcante[Dir.LEFT])
+			if self.board[y][x] == None and (x>-1 and x<12) and (y>-1 and y<12):
 
 		else:
 			x, y = self.coords_to_index(case_adjcante[Dir.LEFT])
