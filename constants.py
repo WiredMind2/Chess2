@@ -15,6 +15,8 @@ class Dir(enum.Enum):
 	LEFT = 2
 	RIGHT = 3
  
+REVERSE = {Dir.UP: Dir.DOWN, Dir.LEFT: Dir.RIGHT, Dir.DOWN: Dir.UP, Dir.RIGHT: Dir.LEFT}
+ 
 class Piece:
 	def __init__(self, team, pos, board):
 		self.team = team
