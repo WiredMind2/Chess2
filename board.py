@@ -99,18 +99,18 @@ class Board(Movement):
 
 if __name__ == '__main__':
 	b = Board()
-	print(b.board)
-	print(b.mouvement_tour_possible('h1'))
+	#print(b.board)
+	print(b.mouvement_tour_possible('d2'))
     
 	assert b.coords_to_index('e8') == b.coords_to_index('i8')
 	assert b.coords_to_index('i9') == b.coords_to_index('d9')
 	assert b.coords_to_index('a9') == b.coords_to_index('l9')
-<<<<<<< HEAD
+
 	assert dict(b.get_adjacent('i5')) == {Dir.UP: 'j5', Dir.DOWN: 'd5', Dir.LEFT: 'i9', Dir.RIGHT: 'i6'}
 	assert dict(b.get_adjacent('i9')) == {Dir.UP: 'e9', Dir.DOWN: 'j9', Dir.LEFT: 'i5', Dir.RIGHT: 'i10'}
 	assert dict(b.get_adjacent('e4')) == {Dir.UP: 'f4', Dir.DOWN: 'd4', Dir.LEFT: 'e3', Dir.RIGHT: 'e9'}
 	pass
-=======
+
 	assert dict(b.get_adjacent('i5')) == {Dir.UP: 'j5', Dir.DOWN: 'd5', Dir.RIGHT: 'i9', Dir.LEFT: 'i6'}
 	assert dict(b.get_adjacent('i9')) == {Dir.UP: 'e9', Dir.DOWN: 'j9', Dir.RIGHT: 'i5', Dir.LEFT: 'i10'}
 	assert dict(b.get_adjacent('e4')) == {Dir.UP: 'f4', Dir.DOWN: 'd4', Dir.RIGHT: 'e3', Dir.LEFT: 'e9'}
@@ -123,4 +123,4 @@ if __name__ == '__main__':
 	assert b.get_diagonal_line('d4', Dir.LEFT) in (['d4', 'e9', 'f10', 'i5', 'j6'], ['d4', 'i5', 'j6', 'e9', 'f10'])
 	assert b.get_diagonal_line('i9', Dir.UP) in (['i9', 'd5', 'c6', 'e4', 'f3'], ['i9', 'e4', 'f3', 'd5', 'c6'])
 	pass
->>>>>>> b90ec4e46963b07febb85f4b78a2a4307a991945
+
