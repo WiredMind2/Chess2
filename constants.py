@@ -58,8 +58,28 @@ class Pawn(Piece):
 
 class Rook(Piece):
 	def list_moves(self):
-		# TODO
-		return []
+		mouvement_dispo = []
+		a,b = self.coords_to_index(self.pos)
+		case_adjcante = dict(self.get_adjacent(self.pos))
+		i = 0
+		for case in case_adjcante.values():
+			continu = True
+			while continu == True:
+				x, y = self.coords_to_index(case)
+				if (x>-1 and x<8) and (y>-1 and y<12) and self.board[y][x] == None :
+					mouvement_dispo.append(case)
+					case_adjcante = dict(self.get_adjacent(case))
+					case = list(case_adjcante.values())[i]
+				elif (x>-1 and x<8) and (y>-1 and y<12) and self.board[y][x].team != self.board[b][a].team  :
+					mouvement_dispo.append(case)
+					case_adjcante = dict(self.get_adjacent(case))
+					case = list(case_adjcante.values())[i]
+					continu = False
+				else:
+					continu = False
+			
+			i += 1
+		return mouvement_dispo
 
 class King(Piece):
 	def list_moves(self):
