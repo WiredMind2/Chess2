@@ -278,3 +278,7 @@ class Movement:
 				return True
 
 		return False
+
+	def is_check(self, src, dest):
+		# TODO - Check all kind of possible movements (queen + knight?) around each king in case there is a check
+		return False
