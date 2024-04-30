@@ -34,9 +34,9 @@ class Board(Movement):
 
 		if x >= 8 and y >= 8: # >= i / Red
 			x = 11 - x # = 4 - (x - 9) <=> lkji => abcd
-
+#test
 		elif x >= 8 and 4 <= y <= 8: # Black
-			x = x - 4 # ijkl => efgh
+			x = x - 4 # ijkl => efgh 
 
 		return x, y # x= lettre, y = chiffre
 
