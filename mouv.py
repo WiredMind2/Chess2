@@ -128,30 +128,6 @@ class Movement:
 				mouvement_dispo.append(case_adjcante2[Dir.DOWN])
 			return mouvement_dispo
 
-	def mouvement_tour_possible(self,coord):
-		mouvement_dispo = []
-		a,b = self.coords_to_index(coord)
-		case_adjcante = dict(self.get_adjacent(coord))
-		i = 0
-		for case in case_adjcante.values():
-			continu = True
-			while continu == True:
-				x, y = self.coords_to_index(case)
-				if (x>-1 and x<8) and (y>-1 and y<12) and self.board[y][x] == None :
-					mouvement_dispo.append(case)
-					case_adjcante = dict(self.get_adjacent(case))
-					case = list(case_adjcante.values())[i]
-				elif (x>-1 and x<8) and (y>-1 and y<12) and self.board[y][x].team != self.board[b][a].team  :
-					mouvement_dispo.append(case)
-					case_adjcante = dict(self.get_adjacent(case))
-					case = list(case_adjcante.values())[i]
-					continu = False
-				else:
-					continu = False
-			
-			i += 1
-		return mouvement_dispo
-
 	def get_straight_line(self, coords, direction, skipped_first=False):
 		# Renvoie une liste de coordonnées dans une direction donnée
 		# S'arrête lorsque l'on atteint un mur ou une autre pièce, en ignorant la première case
