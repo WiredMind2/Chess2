@@ -2,6 +2,45 @@ import string
 from constants import REVERSE, Dir
 
 class Movement:
+
+	@classmethod
+	def coords_to_index(cls, coords):
+		x, y = coords[0], coords[1:]
+		x, y = string.ascii_lowercase.index(x), int(y)-1
+
+		if x >= 8 and y >= 8: # >= i / Red
+			x = 11 - x # = 4 - (x - 9) <=> lkji => abcd
+
+		elif x >= 8 and 4 <= y <= 8: # Black
+			x = x - 4 # ijkl => efgh 
+
+		return x, y # x= lettre, y = chiffre
+
+	@classmethod
+	def index_to_coords(cls, x, y):
+		
+		if y <= 3:
+			# White zone
+			pass  # Don't change anything
+		elif y <= 7:
+			# Black zone
+			if x <= 3:
+				# White side
+				pass  # Don't change anything
+			else:
+				# Red side
+				x = x + 4  # efgh => ijkl
+		else:
+			# Red zone
+			if x <= 3:
+				# Black side
+				x = 11 - x  # abcd => lkji
+			else:
+				# White side
+				pass  # Don't change anything
+	
+		return ''.join((string.ascii_lowercase[x], str(y+1)))
+
 	def get_straight_line(self, coords, direction, skipped_first=False):
 		# Renvoie une liste de coordonnées dans une direction donnée
 		# S'arrête lorsque l'on atteint un mur ou une autre pièce, en ignorant la première case
