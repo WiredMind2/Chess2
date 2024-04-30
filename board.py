@@ -9,7 +9,7 @@ class Board(Movement):
 	def __init__(self):
 		super().__init__()
 		self.reset()
-#test
+		
 	def reset(self):
 		self.board = [[None for _ in range(BOARD_SIZE)] for _ in range(int(BOARD_SIZE * 1.5))] # Number, then letter -> /!\ reverse
 
