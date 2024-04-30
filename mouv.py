@@ -1,133 +1,7 @@
-from itertools import product
 import string
-from constants import BOARD_SIZE, REVERSE, START_ROWS, Dir
-
+from constants import REVERSE, Dir
 
 class Movement:
-
-	def __init__(self):
-
-		self.mouvement_possible = {
-			"K": [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (-1, -1), (1, -1), (-1, 1)],
-			"Q": [
-				(i, j)
-				for i in range(-7, 8)
-				for j in range(-7, 8)
-				if (i != 0 or j != 0) and (i == 0 or j == 0 or abs(i) == abs(j))
-			],
-			"R": [(i, 0) for i in range(-7, 8)] + [(0, j) for j in range(-7, 8)],
-			"B": [
-				(i, j)
-				for i in range(-7, 8)
-				for j in range(-7, 8)
-				if abs(i) == abs(j) and i != 0
-			],
-			"N": [
-				(-2, 1),
-				(-1, 2),
-				(1, 2),
-				(2, 1),
-				(2, -1),
-				(1, -2),
-				(-1, -2),
-				(-2, -1),
-			],
-			"P": [(1, 0), (1, 1), (1, -1)],
-		}
-
-	def get_type(self, coord):
-		"""
-		Parameters
-		----------
-		board : La liste représentant le plateau du jeu
-
-		Returns
-		-------
-		Le type de pièce qu'on a séléctionné
-
-		"""
-		x, y = self.coords_to_index(coord)
-		if self.board[y][x] != None:
-			return self.board[y][x].type
-		else:
-			return None
-
-	def mouvement_pion_possible(self, coord):
-		mouvement_dispo = []
-		case_adjcante = dict(self.get_adjacent(coord))
-		x, y = self.coords_to_index(coord)
-
-		if self.board[y][x] != None and self.board[y][x].team == "W":
-			x, y = self.coords_to_index(case_adjcante[Dir.RIGHT])
-
-			if self.board[y][x] == None and (x > -1 and x < 12) and (y > -1 and y < 12):
-				mouvement_dispo.append(case_adjcante[Dir.RIGHT])
-
-				case_adjcante3 = dict(self.get_adjacent(case_adjcante[Dir.RIGHT]))
-				x, y = self.coords_to_index(case_adjcante3[Dir.RIGHT])
-
-				if (
-					self.board[y][x] == None
-					and (x > -1 and x < 12)
-					and (y > -1 and y < 12)
-				):
-					mouvement_dispo.append(case_adjcante3[Dir.RIGHT])
-
-			case_adjcante2 = dict(self.get_adjacent(case_adjcante[Dir.RIGHT]))
-
-			for direction in [Dir.UP, Dir.DOWN]:
-				x, y = self.coords_to_index(case_adjcante2[direction])
-				if (
-					self.board[y][x] != None
-					and (x > -1 and x < 12)
-					and (y > -1 and y < 12)
-				):
-					mouvement_dispo.append(case_adjcante2[direction])
-
-			return mouvement_dispo
-
-		if self.board[y][x] != None and self.board[y][x].team == "R":
-			x, y = self.coords_to_index(case_adjcante[Dir.LEFT])
-			if self.board[y][x] == None and (x > -1 and x < 12) and (y > -1 and y < 12):
-				mouvement_dispo.append(case_adjcante[Dir.LEFT])
-				case_adjcante3 = dict(self.get_adjacent(case_adjcante[Dir.LEFT]))
-				x, y = self.coords_to_index(case_adjcante3[Dir.LEFT])
-				if (
-					self.board[y][x] == None
-					and (x > -1 and x < 12)
-					and (y > -1 and y < 12)
-				):
-					mouvement_dispo.append(case_adjcante3[Dir.LEFT])
-
-			case_adjcante2 = dict(self.get_adjacent(case_adjcante[Dir.LEFT]))
-			x, y = self.coords_to_index(case_adjcante2[Dir.UP])
-			if self.board[y][x] != None and (x > -1 and x < 12) and (y > -1 and y < 12):
-				mouvement_dispo.append(case_adjcante2[Dir.UP])
-			x, y = self.coords_to_index(case_adjcante2[Dir.DOWN])
-			if self.board[y][x] != None and (x > -1 and x < 12) and (y > -1 and y < 12):
-				mouvement_dispo.append(case_adjcante2[Dir.DOWN])
-			return mouvement_dispo
-		
-		elif self.board[y][x] != None and self.board[y][x].team == 'B':
-			x,y = self.coords_to_index(case_adjcante[Dir.LEFT])
-			if self.board[y][x] == None and (x>-1 and x<12) and (y>-1 and y<12):
-				mouvement_dispo.append(case_adjcante[Dir.LEFT])
-				print(mouvement_dispo)
-				case_adjcante3 = dict(self.get_adjacent(case_adjcante[Dir.LEFT]))
-				print(case_adjcante3)
-				x,y = self.coords_to_index(case_adjcante3[Dir.LEFT])
-				if self.board[y][x] == None and (x>-1 and x<12) and (y>-1 and y<12):
-					mouvement_dispo.append(case_adjcante3[Dir.LEFT])
-			
-			case_adjcante2 = dict(self.get_adjacent(case_adjcante[Dir.LEFT]))
-			x,y = self.coords_to_index(case_adjcante2[Dir.UP])
-			if self.board[y][x] != None and (x>-1 and x<12) and (y>-1 and y<12):
-				mouvement_dispo.append(case_adjcante2[Dir.UP])
-			x,y = self.coords_to_index(case_adjcante2[Dir.DOWN])
-			if self.board[y][x] != None and (x>-1 and x<12) and (y>-1 and y<12):
-				mouvement_dispo.append(case_adjcante2[Dir.DOWN])
-			return mouvement_dispo
-
 	def get_straight_line(self, coords, direction, skipped_first=False):
 		# Renvoie une liste de coordonnées dans une direction donnée
 		# S'arrête lorsque l'on atteint un mur ou une autre pièce, en ignorant la première case
@@ -344,3 +218,24 @@ class Movement:
 
 			out = self.index_to_coords(nx, ny)
 			yield (dir, [out])
+
+	def validate_coordinates(self, coords):
+		# Check if coordinates are actually on the board
+		# Returns bool
+
+		x, y = coords[0], coords[1:]
+		x, y = string.ascii_lowercase.index(x), int(y)-1
+
+		if 0 <= x < 4:
+			if 0 <= y < 8:
+				return True
+
+		elif x < 8:
+			if 0 <= y < 4 or 8 <= y < 12:
+				return True
+
+		elif x < 12:
+			if 4 <= y < 12:
+				return True
+
+		return False

@@ -1,6 +1,7 @@
 import string
-from constants import BOARD_SIZE, START_ROWS, Dir, Piece
+from constants import BOARD_SIZE, START_ROWS, Dir
 from mouv import Movement
+from pieces import Piece
 
 class Board(Movement):
 	"""Représente le plateau de jeu, avec les positions de chaque pion.
@@ -64,26 +65,22 @@ class Board(Movement):
 	
 		return ''.join((string.ascii_lowercase[x], str(y+1)))
 
-	def validate_coordinates(self, coords):
-		# Check if coordinates are actually on the board
-		# Returns bool
+	def get_type(self, coord):
+		"""
+		Parameters
+		----------
+		board : La liste représentant le plateau du jeu
 
-		x, y = coords[0], coords[1:]
-		x, y = string.ascii_lowercase.index(x), int(y)-1
+		Returns
+		-------
+		Le type de pièce qu'on a séléctionné
 
-		if 0 <= x < 4:
-			if 0 <= y < 8:
-				return True
-
-		elif x < 8:
-			if 0 <= y < 4 or 8 <= y < 12:
-				return True
-
-		elif x < 12:
-			if 4 <= y < 12:
-				return True
-
-		return False
+		"""
+		x, y = self.coords_to_index(coord)
+		if self.board[y][x] != None:
+			return self.board[y][x].type
+		else:
+			return None
 
 	def __getitem__(self, coords):
 		""" val = dico['e5'] """
