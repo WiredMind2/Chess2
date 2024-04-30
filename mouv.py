@@ -4,36 +4,9 @@ from constants import BOARD_SIZE, REVERSE, START_ROWS, Dir
 
 
 class Movement:
-
+	
 	def __init__(self):
-
-		self.mouvement_possible = {
-			"K": [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (-1, -1), (1, -1), (-1, 1)],
-			"Q": [
-				(i, j)
-				for i in range(-7, 8)
-				for j in range(-7, 8)
-				if (i != 0 or j != 0) and (i == 0 or j == 0 or abs(i) == abs(j))
-			],
-			"R": [(i, 0) for i in range(-7, 8)] + [(0, j) for j in range(-7, 8)],
-			"B": [
-				(i, j)
-				for i in range(-7, 8)
-				for j in range(-7, 8)
-				if abs(i) == abs(j) and i != 0
-			],
-			"N": [
-				(-2, 1),
-				(-1, 2),
-				(1, 2),
-				(2, 1),
-				(2, -1),
-				(1, -2),
-				(-1, -2),
-				(-2, -1),
-			],
-			"P": [(1, 0), (1, 1), (1, -1)],
-		}
+		self.directions = [Dir.UP, Dir.DOWN,  Dir.LEFT, Dir.RIGHT]
 
 	def get_type(self, coord):
 		"""
@@ -154,7 +127,13 @@ class Movement:
 			i += 1
 		return mouvement_dispo
 	
-			
+	def mouvement_fou_possible(self, coord):
+		mouvement_dispo = []
+		a,b = self.coords_to_index(coord)
+		mouvement_envisage = []
+		for direction in self.directions:
+			mouvement_envisage.append(self.get_straight_line(self, coord, direction))
+		print(mouvement_envisage)
 
 	def get_straight_line(self, coords, direction, skipped_first=False):
 		# Renvoie une liste de coordonnées dans une direction donnée

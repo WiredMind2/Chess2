@@ -22,7 +22,6 @@ class Board(Movement):
 			for i, row in enumerate(START_ROWS):
 				for j, p in enumerate(row):
 					self.board[start - i][j] = Piece.from_name(p)(team, (i, j), self)
-		
 
 	def get(self, i, j):
 		return self.board[i][j]
@@ -99,8 +98,7 @@ class Board(Movement):
 
 if __name__ == '__main__':
 	b = Board()
-	#print(b.board)
-	print(b.mouvement_tour_possible('d2'))
+	print(b.mouvement_fou_possible('f2'))
     
 	assert b.coords_to_index('e8') == b.coords_to_index('i8')
 	assert b.coords_to_index('i9') == b.coords_to_index('d9')
