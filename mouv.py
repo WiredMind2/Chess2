@@ -128,9 +128,7 @@ class Movement:
 				mouvement_dispo.append(case_adjcante2[Dir.DOWN])
 			return mouvement_dispo
 
-		
-		
-	def mouvement_tour_possible(self,coord):	
+	def mouvement_tour_possible(self,coord):
 		mouvement_dispo = []
 		a,b = self.coords_to_index(coord)
 		case_adjcante = dict(self.get_adjacent(coord))
@@ -143,7 +141,7 @@ class Movement:
 					mouvement_dispo.append(case)
 					case_adjcante = dict(self.get_adjacent(case))
 					case = list(case_adjcante.values())[i]
-				elif (x>-1 and x<8) and (y>-1 and y<12)  and self.board[y][x].team != self.board[b][a].team  :
+				elif (x>-1 and x<8) and (y>-1 and y<12) and self.board[y][x].team != self.board[b][a].team  :
 					mouvement_dispo.append(case)
 					case_adjcante = dict(self.get_adjacent(case))
 					case = list(case_adjcante.values())[i]
@@ -153,8 +151,6 @@ class Movement:
 			
 			i += 1
 		return mouvement_dispo
-	
-			
 
 	def get_straight_line(self, coords, direction, skipped_first=False):
 		# Renvoie une liste de coordonnées dans une direction donnée
@@ -187,12 +183,12 @@ class Movement:
 
 	def get_adjacent(self, coords):
 		x, y = self.coords_to_index(coords)
-		for dir, (dx, dy) in [(Dir.DOWN, (-1, 0)), (Dir.UP, (1, 0)), (Dir.LEFT, (0, -1)), (Dir.RIGHT, (0, 1))]:
+		for dir, (dx, dy) in [(Dir.DOWN, (-1, 0)), (Dir.UP, (1, 0)), (Dir.RIGHT, (0, -1)), (Dir.LEFT, (0, 1))]:
 			nx, ny = x+dx, y+dy
-  
+
 			# region: bounds
-   
-			if not (0 <= x < 8):
+
+			if not (0 <= nx < 8):
 				# Out of bounds
 				continue
 			
