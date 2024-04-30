@@ -23,7 +23,7 @@ class Piece:
 		self.pos = pos
 		self.board = board
 		self.type = self.__class__.__name__
-
+		self.dir = list(Dir)
 	def __repr__(self):
 		return f'{self.team} {self.type}{self.pos}'
 
@@ -93,8 +93,14 @@ class Queen(Piece):
 
 class Bishop(Piece):
 	def list_moves(self):
-		# TODO
-		return []
+		mouvement_possible = []
+		a,b = self.coords_to_index(self.pos)
+		for direction in self.dir:
+				x = self.get_diagonal_line(self, self.pos, direction)
+			
+	
+
+		
 
 class Knight(Piece):
 	def list_moves(self):

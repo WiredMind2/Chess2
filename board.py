@@ -8,7 +8,7 @@ class Board(Movement):
 	def __init__(self):
 		super().__init__()
 		self.reset()
-
+#test
 	def reset(self):
 		self.board = [[None for _ in range(BOARD_SIZE)] for _ in range(int(BOARD_SIZE * 1.5))] # Number, then letter -> /!\ reverse
 
@@ -34,7 +34,6 @@ class Board(Movement):
 
 		if x >= 8 and y >= 8: # >= i / Red
 			x = 11 - x # = 4 - (x - 9) <=> lkji => abcd
-#test
 		elif x >= 8 and 4 <= y <= 8: # Black
 			x = x - 4 # ijkl => efgh 
 
@@ -99,9 +98,8 @@ class Board(Movement):
 
 if __name__ == '__main__':
 	b = Board()
-	#print(b.board)
-	# print(b.mouvement_tour_possible('d2'))
-    
+	x, y = b.coords_to_index('f1')
+	print(b.board[y][x].list_moves())
 	assert b.coords_to_index('e8') == b.coords_to_index('i8')
 	assert b.coords_to_index('i9') == b.coords_to_index('d9')
 	assert b.coords_to_index('a9') == b.coords_to_index('l9')
