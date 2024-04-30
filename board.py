@@ -9,7 +9,7 @@ class Board(Movement):
 	def __init__(self):
 		super().__init__()
 		self.reset()
-		
+
 	def reset(self):
 		self.board = [[None for _ in range(BOARD_SIZE)] for _ in range(int(BOARD_SIZE * 1.5))] # Number, then letter -> /!\ reverse
 
@@ -27,43 +27,6 @@ class Board(Movement):
 
 	def get(self, i, j):
 		return self.board[i][j]
-
-	@classmethod
-	def coords_to_index(cls, coords):
-		x, y = coords[0], coords[1:]
-		x, y = string.ascii_lowercase.index(x), int(y)-1
-
-		if x >= 8 and y >= 8: # >= i / Red
-			x = 11 - x # = 4 - (x - 9) <=> lkji => abcd
-		elif x >= 8 and 4 <= y <= 8: # Black
-			x = x - 4 # ijkl => efgh 
-
-		return x, y # x= lettre, y = chiffre
-
-	@classmethod
-	def index_to_coords(cls, x, y):
-		
-		if y <= 3:
-			# White zone
-			pass  # Don't change anything
-		elif y <= 7:
-			# Black zone
-			if x <= 3:
-				# White side
-				pass  # Don't change anything
-			else:
-				# Red side
-				x = x + 4  # efgh => ijkl
-		else:
-			# Red zone
-			if x <= 3:
-				# Black side
-				x = 11 - x  # abcd => lkji
-			else:
-				# White side
-				pass  # Don't change anything
-	
-		return ''.join((string.ascii_lowercase[x], str(y+1)))
 
 	def get_type(self, coord):
 		"""
