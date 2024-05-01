@@ -2,6 +2,7 @@ from constants import Dir
 from mouv import Movement
 
 
+
 class Piece(Movement):
 	def __init__(self, team, pos, board):
 		self.team = team
@@ -91,8 +92,10 @@ class Queen(Piece):
 
 class Bishop(Piece):
 	def list_moves(self):
-		# TODO
-		return []
+		mouvement_possible = []
+		a,b = self.coords_to_index(self.pos)
+		for direction in self.dir:
+				x = self.get_diagonal_line(self, self.pos, direction)
 
 
 class Knight(Piece):
