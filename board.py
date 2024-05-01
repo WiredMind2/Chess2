@@ -16,17 +16,17 @@ class Board(Movement):
 		# White
 		for i, row in enumerate(START_ROWS):
 			for j, p in enumerate(row):
-				self.board[i][j] = Piece.from_name(p)('W', (i, j), self)
+				self.board[i][j] = Piece.from_name(p)('W', (j, i), self)
 
 		# Black and red, reversed
 		for start, team in [(7, 'B'), (11, 'R')]:
 			for i, row in enumerate(START_ROWS):
 				for j, p in enumerate(row):
-					self.board[start - i][j] = Piece.from_name(p)(team, (i, j), self)
+					self.board[start - i][j] = Piece.from_name(p)(team, (j, start-i), self)
 		
 
 	def get(self, i, j):
-		return self.board[i][j]
+		return self.board[j][i]
 
 	def get_type(self, coord):
 		"""
@@ -45,7 +45,7 @@ class Board(Movement):
 		else:
 			return None
 
-	def __getitem__(self, coords):
+	def __getitem__(self, coords)-> Piece|None:
 		""" val = dico['e5'] """
 		
 		x, y = self.coords_to_index(coords)
@@ -84,3 +84,6 @@ if __name__ == '__main__':
 	assert b.get_diagonal_line('i9', Dir.UP) in (['i9', 'd5', 'c6', 'e4', 'f3'], ['i9', 'e4', 'f3', 'd5', 'c6'])
 	pass
 
+
+	b['c6'] = Piece.from_name('P')('W', b.coords_to_index('c6'), b)
+	print(b['d7'].list_moves())

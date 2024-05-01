@@ -18,7 +18,6 @@ class Movement:
 
 	@classmethod
 	def index_to_coords(cls, x, y):
-		
 		if y <= 3:
 			# White zone
 			pass  # Don't change anything
@@ -71,7 +70,11 @@ class Movement:
 		return out
 
 	def get_adjacent(self, coords):
-		x, y = self.coords_to_index(coords)
+		if isinstance(coords, str):
+			x, y = self.coords_to_index(coords)
+		else:
+			x, y = coords
+
 		for dir, (dx, dy) in [(Dir.DOWN, (-1, 0)), (Dir.UP, (1, 0)), (Dir.RIGHT, (0, -1)), (Dir.LEFT, (0, 1))]:
 			nx, ny = x+dx, y+dy
 
@@ -277,4 +280,8 @@ class Movement:
 			if 4 <= y < 12:
 				return True
 
+		return False
+
+	def is_check(self, src, dest):
+		# TODO - Check all kind of possible movements (queen + knight?) around each king in case there is a check
 		return False
