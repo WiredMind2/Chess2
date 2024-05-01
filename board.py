@@ -58,8 +58,10 @@ class Board(Movement):
 
 if __name__ == '__main__':
 	b = Board()
-	x, y = b.coords_to_index('f1')
+	#print(b.board)
+	x,y = b.coords_to_index('f2')
 	print(b.board[y][x].list_moves())
+    
 	assert b.coords_to_index('e8') == b.coords_to_index('i8')
 	assert b.coords_to_index('i9') == b.coords_to_index('d9')
 	assert b.coords_to_index('a9') == b.coords_to_index('l9')
