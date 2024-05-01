@@ -92,10 +92,10 @@ class Queen(Piece):
 
 class Bishop(Piece):
 	def list_moves(self):
-		mouvement_possible = []
-		a,b = self.coords_to_index(self.pos)
-		for direction in self.dir:
-				x = self.get_diagonal_line(self, self.pos, direction)
+		out = []
+		for dir in list(Dir):
+			out.append(self.get_diagonal_line(self.pos, dir))
+		return out
 
 
 class Knight(Piece):

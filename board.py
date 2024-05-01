@@ -59,7 +59,7 @@ class Board(Movement):
 if __name__ == '__main__':
 	b = Board()
 	#print(b.board)
-	x,y = b.coords_to_index('f2')
+	x,y = b.coords_to_index('f1')
 	print(b.board[y][x].list_moves())
     
 	assert b.coords_to_index('e8') == b.coords_to_index('i8')
