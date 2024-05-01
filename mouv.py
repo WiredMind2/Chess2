@@ -5,6 +5,9 @@ class Movement:
 
 	@classmethod
 	def coords_to_index(cls, coords):
+		if not isinstance(coords, str):
+			coords = cls.index_to_coords(*coords)
+
 		x, y = coords[0], coords[1:]
 		x, y = string.ascii_lowercase.index(x), int(y)-1
 
@@ -142,14 +145,21 @@ class Movement:
 		# Renvoie une liste de coordonnées dans une direction donnée, en diagonale
 		# S'arrête lorsque l'on atteint un mur ou une autre pièce, en ignorant la première case
 		
+		if not isinstance(coords, str):
+			coords = self.index_to_coords(*coords)
+
 		# Check limits
 		if not self.validate_coordinates(coords):
 			# Could be invalid coordinate, but it can still be mapped to a correct one
 			return []
 
 		# Check cell
-		x, y = self.coords_to_index(coords)
-		if origin is not None and self.board[y][x] is not None:
+		if isinstance(self.board, list):
+			b = self
+		else:
+			b = self.board
+
+		if origin is not None and b[coords] is not None:
 			return []
 
 		adj = dict(self.get_adjacent_diagonale(coords))
