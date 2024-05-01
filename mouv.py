@@ -265,6 +265,9 @@ class Movement:
 		# Check if coordinates are actually on the board
 		# Returns bool
 
+		if not isinstance(coords, str):
+			coords = self.index_to_coords(coords)
+
 		x, y = coords[0], coords[1:]
 		x, y = string.ascii_lowercase.index(x), int(y)-1
 
