@@ -29,7 +29,7 @@ class Piece(Movement):
 		names = {
 			'K': King,
 			'Q': Queen,
-			'B': Bishop,
+			'B': Bishop, 
 			'N': Knight,
 			'R': Rook,
 			'P': Pawn
@@ -86,18 +86,36 @@ class King(Piece):
 
 class Queen(Piece):
 	def list_moves(self):
-		# TODO
-		return []
+		x,y = self.pos[0], self.pos[1]
+		cord = self.index_to_coords(x,y)
+		out = []
+		self.board[cord] = self.from_name("R")(f'{self.team}', (x, y), self.board)
+		out += (self.board[cord].list_moves())
 
+		self.board[cord] = self.from_name("B")(f'{self.team}', (x, y), self.board)
+		out += (self.board[cord].list_moves())
 
+		self.board[cord] = self.from_name("Q")(f'{self.team}', (x, y), self.board)
+
+		return out 
+	
 class Bishop(Piece):
 	def list_moves(self):
-		mouvement_possible = []
-		a,b = self.coords_to_index(self.pos)
-		for direction in list(Dir):
-			x = self.get_diagonal_line(self.pos, direction)
+		out = []
+		for dir in list(Dir):
+			out += self.get_diagonal_line(self.pos, dir)
 
+		k = self.index_to_coords(self.pos[0], self.pos[1])
+		a = self.index_to_coords(self.pos[0], self.pos[1])
 
+		out2 = []
+		for i in out:
+			if i != k and self.board[i] == None:
+				out2.append(i)
+			elif i != k and self.board[a].team != self.board[i].team: 
+				out2.append(i)
+		return out2
+	
 class Knight(Piece):
 	def list_moves(self):
 		# TODO
