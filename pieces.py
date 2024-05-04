@@ -137,6 +137,29 @@ class Bishop(Piece):
 	
 class Knight(Piece):
 	def list_moves(self):
-		
-		
-		return []
+
+		x,y = self.pos[0], self.pos[1]
+		coord = self.index_to_coords(x,y)
+
+		cant = []
+		for one in self.get_adjacent(coord):
+			cant.append(one[1])
+
+		step = []
+		a = list(self.get_adjacent_diagonale(coord))
+		for one in a:
+			for two in one[1]:
+				step.append(two)
+		can = []
+		for each in step:
+			for one in self.get_adjacent(each):
+				if one[1] not in cant:
+					can.append(one[1])
+		out = []
+		for each in can:
+			if self.board[each] == None:
+				out.append(each)
+			elif self.board[each].team != self.board[coord].team: 
+				out.append(each)
+				
+		return out
