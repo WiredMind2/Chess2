@@ -101,7 +101,35 @@ class King(Piece):
 				elif self.board[each].team != self.board[coord].team and self.board[each].type != self.board[coord].type: 
 					out.append(each)
 
+		out += self.roque()
+
 		return out 
+
+	def roque(self):
+		x,y = self.pos[0], self.pos[1]
+		coord = self.index_to_coords(x,y)
+		out = []
+
+		if self.board[coord].team == 'W' and coord == 'e1':
+			if self.board['f1'] == None and self.board['g1'] == None and self.board['h1'].type == "R":
+				out.append('g1')
+			elif self.board['d1'] == None and self.board['c1'] == None and self.board['b1'] == None and self.board['a1'].type == "R":
+				out.append('c1')
+		elif self.board[coord].team == 'R' and coord == 'i12':
+			if self.board['f12'] == None and self.board['g12'] == None and self.board['h12'].type == "R":
+				out.append('g12')
+			elif self.board['i12'] == None and self.board['j12'] == None and self.board['k12'] == None and self.board['l12'].type == "R":
+				out.append('j12')
+		elif self.board[coord].team == 'B' and coord == 'd8':
+			if self.board['c8'] == None and self.board['b8'] == None and self.board['a8'].type == "R":
+				out.append('b8')
+			elif self.board['i8'] == None and self.board['j8'] == None and self.board['k8'] == None and self.board['l8'].type == "R":
+				out.append('j8')
+		
+		return out
+
+
+
 
 class Queen(Piece):
 	def list_moves(self):

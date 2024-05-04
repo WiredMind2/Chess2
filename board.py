@@ -58,7 +58,7 @@ class Board(Movement):
 
 if __name__ == '__main__':
 	b = Board()
-	b['c3'] = Piece.from_name('N')('W', b.coords_to_index('c3'), b)
+	b['c3'] = Piece.from_name('K')('W', b.coords_to_index('c3'), b)
 	print(b['c3'].list_moves())
 
 	assert b.coords_to_index('e8') == b.coords_to_index('i8')
