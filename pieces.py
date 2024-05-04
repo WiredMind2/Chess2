@@ -80,9 +80,28 @@ class Rook(Piece):
 
 class King(Piece):
 	def list_moves(self):
-		# TODO
-		return []
+		x,y = self.pos[0], self.pos[1]
+		coord = self.index_to_coords(x,y)
+		posibilities = self.get_adjacent(coord)
 
+		out = []
+		for posibilitie in posibilities:
+			
+			if self.board[posibilitie[1]] == None:
+				out.append(posibilitie[1])
+			elif self.board[posibilitie[1]].team != self.board[coord].team: 
+				out.append(posibilitie[1])
+
+		
+		posibilities2 = self.get_adjacent_diagonale(coord)
+		for posibilitie in posibilities2:
+			for each in posibilitie[1]:
+				if self.board[each] == None:
+					out.append(each)
+				elif self.board[each].team != self.board[coord].team and self.board[each].type != self.board[coord].type: 
+					out.append(each)
+
+		return out 
 
 class Queen(Piece):
 	def list_moves(self):
@@ -118,5 +137,6 @@ class Bishop(Piece):
 	
 class Knight(Piece):
 	def list_moves(self):
-		# TODO
+		
+		
 		return []
