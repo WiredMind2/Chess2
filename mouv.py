@@ -160,7 +160,7 @@ class Movement:
 			b = self.board
 
 		if origin is not None and b[coords] is not None:
-			return []
+			return [coords]
 
 		adj = dict(self.get_adjacent_diagonale(coords))
 		if origin is not None:
