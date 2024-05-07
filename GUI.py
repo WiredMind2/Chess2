@@ -1,3 +1,5 @@
+from functools import cache
+import math
 import os
 import pygame
 
@@ -11,6 +13,7 @@ class GUI:
 		self.scale = 1
 		self.selected = None
 		self.team_turn = 'W'
+		self.update = True
 
 		self.board = Board()
 
@@ -45,7 +48,7 @@ class GUI:
 		button = event.button
 		pos = event.pos
 
-		cell = self.coords_to_cell(pos)
+		cell = self.pos_to_coords(pos)
 
 		if button == 1: # Left click
 			piece = self.board[cell]
@@ -60,11 +63,15 @@ class GUI:
 						self.selected = None
 
 	def render(self):
+		if not self.update:
+			return
+		self.update = False
+		self.screen.fill("purple")
+		dest = self.render_board()
+		piece = self.board.get(0, 11)
+		self.render_pieces()
 
-		# self.screen.fill("purple")
-		self.render_board()
-		piece = self.board.get(11, 0)
-		self.render_piece(piece)
+		# self.screen.blit(self.board_surf, dest)
 
 	def render_board(self):
 		surf = pygame.image.load(os.path.join('assets', 'board.png'))
@@ -74,18 +81,23 @@ class GUI:
 	
 		self.scale = dest.width // surf.get_rect().width
 
-		surf = pygame.transform.smoothscale(surf, dest.size)
+		self.board_surf = pygame.transform.smoothscale(surf, dest.size)
 		dest.center = self.screen.get_rect().center
-
-		self.screen.blit(surf, dest)
+		return dest
 
 	def render_piece(self, piece):
 		if piece is None:
 			return
 
-		dest = self.cell_to_coords(piece.pos)
-		surf = self.get_piece_surface(piece.type[0], piece.team)
+		surf = self.get_piece_surface(piece.type_short, piece.team)
+		dest = tuple(map(lambda e: e[0]-e[1], zip(self.coords_to_pos(piece.pos),surf.get_rect().center))) # Centers the image
+
+		# self.board_surf.blit(surf, dest)
 		self.screen.blit(surf, dest)
+
+	def render_pieces(self):
+		for piece in self.board.iterate():
+			self.render_piece(piece)
 
 	def load_pieces(self):
 		self.pieces = {}
@@ -124,14 +136,82 @@ class GUI:
 
 				self.pieces[name][color] = surf
 
-	def get_piece_surface(self, name, color):
+	def get_piece_surface(self, name, color) -> pygame.Surface:
 		return self.pieces[name][color]
 
-	def cell_to_coords(self, pos):
-		# TODO
-		return self.screen.get_rect().center
+	@cache
+	def coords_to_pos(self, pos):
+		"""
+		Return position on screen for a given pos.
+		"""
+		# Doesn't work (yet)
 
-	def coords_to_cell(self, pos):
+		if isinstance(pos, str):
+			pos = self.board.coords_to_index(pos)
+		x, y = pos
+		# if x >= 8:
+		# 	x -= 4
+		# if y >= 8:
+		# 	y -= 4
+
+		nx, ny = x-4, y-4
+		r = math.sqrt(nx**2+ny**2)
+		if nx == 0:
+			teta = 0
+		else:
+			teta = math.atan(ny/nx)
+  
+		if nx < 0:
+			teta = math.pi+teta
+
+		# TODO -> Temporary stuff
+		b_rect = self.board_surf.get_rect()
+		b_size = b_rect.size
+		b_center = b_rect.center
+		out = nx/r*b_size[0]/2+b_center[0], ny/r*b_size[1]/2+b_center[1]
+		return out
+
+	def coords_to_pos(self, coords):
+		x, y = coords
+		# Find third of board
+		# -> Equivalent of the team side
+		third = (-1/2 - 2/3*(y//4))*math.pi
+
+		# Find sixth of board <=> first branch angle
+		sixth = third + (2*(x<4)-1)*1/6+math.pi
+
+		# Find first branch length
+		sixth_l = 1/8 # of the radius
+
+		# Find the two sub vectors
+		vec_a, vec_b = sixth + 1/6*math.pi, sixth - 1/6*math.pi
+
+		# if x > 4:
+		x, y = y, x
+		l_a, l_b = abs(x)*1/4, abs(y)*1/4
+
+		# Find total vector
+		rect = self.board_surf.get_rect()
+		r = rect.height/2
+		cx, cy = self.screen.get_rect().center
+
+		fx, fy = math.cos(sixth)*sixth_l, math.sin(sixth)*sixth_l
+		pygame.draw.line(self.screen, 'black', (cx, cy), (fx*r+cx, fy*r+cy), 4)
+		sax, say = math.cos(vec_a)*l_a, math.sin(vec_a)*l_a
+		sbx, sby = math.cos(vec_b)*l_b, math.sin(vec_b)*l_b
+		sx, sy = sax+sbx, say+sby
+		pygame.draw.line(self.screen, 'blue', (fx*r+cx, fy*r+cy), ((fx+sx)*r+cx, (fy+sy)*r+cy), 4)
+		tx, ty = -fx+sx, -fy+sy
+
+		# Correct scale and centered
+		rect = self.board_surf.get_rect()
+		r = rect.height/2
+		cx, cy = rect.center
+		out = tx*r, ty*r
+
+		return out
+
+	def pos_to_coords(self, pos):
 		# TODO
 		return 'e5'
 

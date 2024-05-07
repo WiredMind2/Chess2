@@ -9,6 +9,7 @@ class Piece(Movement):
 		self.pos = pos
 		self.board = board
 		self.type = self.__class__.__name__
+		self.type_short = self.type[0] if self.type != 'Knight' else 'N'
 
 	def __repr__(self):
 		return f'{self.team} {self.type}{self.pos}'
