@@ -10,6 +10,7 @@ class Piece(Movement):
 		self.board = board
 		self.type = self.__class__.__name__
 		self.type_short = self.type[0] if self.type != 'Knight' else 'N'
+		self.sprite = None
 
 	def __repr__(self):
 		return f'{self.team} {self.type}{self.pos}'
@@ -135,15 +136,9 @@ class King(Piece):
 class Queen(Piece):
 	def list_moves(self):
 		x,y = self.pos[0], self.pos[1]
-		cord = self.index_to_coords(x,y)
-		out = []
-		self.board[cord] = self.from_name("R")(f'{self.team}', (x, y), self.board)
-		out += (self.board[cord].list_moves())
 
-		self.board[cord] = self.from_name("B")(f'{self.team}', (x, y), self.board)
-		out += (self.board[cord].list_moves())
-
-		self.board[cord] = self.from_name("Q")(f'{self.team}', (x, y), self.board)
+		out = self.from_name("R")(f'{self.team}', (x, y), self.board).list_moves()
+		out += self.from_name("B")(f'{self.team}', (x, y), self.board).list_moves()
 
 		return out 
 	
