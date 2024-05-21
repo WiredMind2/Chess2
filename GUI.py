@@ -5,7 +5,7 @@ import pygame
 
 from board import Board
 from bot import Bot
-from constants import COLORS, SCREEN_SIZE
+from constants import COLORS, SCREEN_SIZE, TEAMS
 from mouv import Vec2
 from pieces import Piece
 
@@ -111,7 +111,6 @@ class GUI:
 			pass
 
 		self.update_board = True
-
 
 	def render(self):
 		if self.update_board:
@@ -416,28 +415,29 @@ class PieceSprite(pygame.sprite.Sprite):
 		self.piece = piece
 		self.piece.sprite = self
 
-		path = os.path.join('assets', 'pieces', f'white-{piece.__class__.__name__.lower()}.png')
+		full_team = TEAMS[piece.team]
+		path = os.path.join('assets', 'pieces', f'{full_team}-{piece.__class__.__name__.lower()}.png')
 		surf = pygame.image.load(path)
 
-		if piece.team != 'W': # TODO - Should delete when other pieces images are available
-			fill, border = COLORS[piece.team]
+		if False: # Not needed anymore
+			if piece.team != 'W': # TODO - Should delete when other pieces images are available
+				fill, border = COLORS[piece.team]
 
-			surf = surf.copy()
-			for x in range(surf.get_width()):
-				for y in range(surf.get_height()):
-					r, g, b, a = surf.get_at((x, y))
-					if a > 0:
-						if (r, g, b) == (255, 255, 255):
-							surf.set_at((x, y), pygame.Color(fill))
-						elif (r, b, g) == (0, 0, 0):
-							surf.set_at((x, y), pygame.Color(border))
+				surf = surf.copy()
+				for x in range(surf.get_width()):
+					for y in range(surf.get_height()):
+						r, g, b, a = surf.get_at((x, y))
+						if a > 0:
+							if (r, g, b) == (255, 255, 255):
+								surf.set_at((x, y), pygame.Color(fill))
+							elif (r, b, g) == (0, 0, 0):
+								surf.set_at((x, y), pygame.Color(border))
 
 		self.image = pygame.transform.smoothscale_by(surf, scale/2)
 
 		self.rect = self.image.get_rect()
 		self.rect.center = pos
 
-  
 	def move(self, dst):	
 		if isinstance(dst, Vec2):
 			dst = dst.tuple()
