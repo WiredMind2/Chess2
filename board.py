@@ -66,13 +66,15 @@ class Board(Movement):
 
 if __name__ == '__main__':
 	b = Board()
-	b['j9'] = Piece.from_name('P')('R', b.coords_to_index('j9'), b)
-	b['i7'] = None
-	b['f1'] = None
-	b['g1'] = None
-	print(b['e1'].list_moves())
-	print(b['e1'].roque())
-	
+	b['d3'] = Piece.from_name('P')('R', b.coords_to_index('d3'), b)
+	#b['i7'] = None
+	#b['f1'] = None
+	#b['g1'] = None
+	#print(b['e1'].list_moves())
+	#print(b['e1'].roque())
+	b['f3'] = Piece.from_name('P')('R', b.coords_to_index('f3'), b)
+	print(b['f3'].list_moves())
+
 	assert b.coords_to_index('e8') == b.coords_to_index('i8')
 	assert b.coords_to_index('i9') == b.coords_to_index('d9')
 	assert b.coords_to_index('a9') == b.coords_to_index('l9')
@@ -92,7 +94,3 @@ if __name__ == '__main__':
 	assert dict(b.get_adjacent_diagonale('b3')) == {Dir.DOWN: ['a4'], Dir.UP: ['c2'], Dir.LEFT: ['c4'], Dir.RIGHT: ['a2']}
 	assert dict(b.get_adjacent_diagonale('d4')) in ({Dir.DOWN: ['c5'], Dir.UP: ['e3'], Dir.LEFT: ['e9', 'i5'], Dir.RIGHT: ['c3']}, {Dir.DOWN: ['c5'], Dir.UP: ['e3'], Dir.LEFT: ['i5', 'e9'], Dir.RIGHT: ['c3']})
 	pass
-
-
-	b['c6'] = Piece.from_name('P')('W', b.coords_to_index('c6'), b)
-	print(b['d7'].list_moves())

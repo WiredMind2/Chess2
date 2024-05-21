@@ -42,25 +42,51 @@ class Piece(Movement):
 
 class Pawn(Piece):
 	def list_moves(self):
-		if self.team == 'W':
-			dy = 1
-		else:
-			dy = -1
-		
-		x, y = self.pos
-		ny = y+dy
+		out  = []
 
-		out = [self.index_to_coords(x, ny)]
+		x,y = self.pos
+		coord = self.index_to_coords(x,y)
 
-		if {'W': 1, 'B': 6, 'R': 10}[self.team] == y:
-			# First move, we can move two cells forward
-			out.append(self.index_to_coords(x, ny+dy))
+		if self.team == "W":
+			adj = dict(self.get_adjacent(coord))
+			adj2 = dict(self.get_adjacent(adj[Dir.LEFT]))
+			if self.board[adj[Dir.LEFT]] == None:
+				out.append(adj[Dir.LEFT])
+				print(coord[1])
+				if coord[1] == '2' and self.board[adj2[Dir.LEFT]] == None:
+					out.append(adj2[Dir.LEFT])
 
-		for dx in (-1, 1):
-			c = self.board.get(x+dx, ny)
-			if c is not None and c.team != self.team:
-				out.append(self.index_to_coords(x+dx, ny))
-	
+			
+			for i in (Dir.UP, Dir.DOWN):
+				if i in adj2.keys() and self.board[adj2[i]] != None and self.board[adj2[i]].team != self.team:
+					out.append(adj2[i])
+
+		if self.team == 'B':
+			adj = dict(self.get_adjacent(coord))
+			adj2 = dict(self.get_adjacent(adj[Dir.RIGHT]))
+
+			if self.board[adj[Dir.RIGHT]] == None:
+				out.append(adj[Dir.RIGHT])
+				if coord[1] == '7' and self.board[adj2[Dir.RIGHT]] == None:
+					out.append(adj2[Dir.RIGHT])
+
+			
+			for i in (Dir.UP, Dir.DOWN):
+				if i in adj2.keys() and self.board[adj2[i]] != None and self.board[adj2[i]].team != self.team:
+					out.append(adj2[i])
+
+		if self.team == 'R':
+			adj = dict(self.get_adjacent(coord))
+			adj2 = dict(self.get_adjacent(adj[Dir.RIGHT]))
+			if self.board[adj[Dir.RIGHT]] == None:
+				out.append(adj[Dir.RIGHT])
+				if coord[1:] == '11' and self.board[adj2[Dir.RIGHT]] == None:
+					out.append(adj2[Dir.RIGHT])
+
+			
+			for i in (Dir.UP, Dir.DOWN):
+				if i in adj2.keys() and self.board[adj2[i]] != None and self.board[adj2[i]].team != self.team:
+					out.append(adj2[i])
 		return out
 
 	def promotion(self):
@@ -140,7 +166,7 @@ class King(Piece):
 
 class Queen(Piece):
 	def list_moves(self):
-		x,y = self.pos[0], self.pos[1]
+		x,y = self.pos
 
 		out = self.from_name("R")(f'{self.team}', (x, y), self.board).list_moves()
 		out += self.from_name("B")(f'{self.team}', (x, y), self.board).list_moves()
