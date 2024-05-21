@@ -47,41 +47,59 @@ class Pawn(Piece):
 		x,y = self.pos
 		coord = self.index_to_coords(x,y)
 
-		if self.team == "W":
+		if coord[0] in ['a','b','c','d','e','f','g','h' ] and coord[1:] in ['1','2','3','4']:
+			if self.team == 'W':
+				direc = Dir.LEFT
+			if self.team == 'B':
+				direc = Dir.RIGHT
+			if self.team == 'R':
+				direc = Dir.RIGHT
 			adj = dict(self.get_adjacent(coord))
-			adj2 = dict(self.get_adjacent(adj[Dir.LEFT]))
-			if self.board[adj[Dir.LEFT]] == None:
-				out.append(adj[Dir.LEFT])
+			adj2 = dict(self.get_adjacent(adj[direc]))
+			if self.board[adj[direc]] == None:
+				out.append(adj[direc])
 				print(coord[1])
-				if coord[1] == '2' and self.board[adj2[Dir.LEFT]] == None:
-					out.append(adj2[Dir.LEFT])
+				if coord[1] == '2' and self.board[adj2[direc]] == None:
+					out.append(adj2[direc])
 
 			
 			for i in (Dir.UP, Dir.DOWN):
 				if i in adj2.keys() and self.board[adj2[i]] != None and self.board[adj2[i]].team != self.team:
 					out.append(adj2[i])
 
-		if self.team == 'B':
+		if coord[0] in ['a','b','c','d','i','j','k','l'] and coord[1:] in ['5','6','7','8']:
+			if self.team == 'W':
+				direc = Dir.LEFT
+			if self.team == 'B':
+				direc = Dir.RIGHT
+			if self.team == 'R':
+				direc = Dir.LEFT
 			adj = dict(self.get_adjacent(coord))
-			adj2 = dict(self.get_adjacent(adj[Dir.RIGHT]))
+			adj2 = dict(self.get_adjacent(adj[direc]))
 
-			if self.board[adj[Dir.RIGHT]] == None:
-				out.append(adj[Dir.RIGHT])
-				if coord[1] == '7' and self.board[adj2[Dir.RIGHT]] == None:
-					out.append(adj2[Dir.RIGHT])
+			if self.board[adj[direc]] == None:
+				out.append(adj[direc])
+				if coord[1:] == '7' and self.board[adj2[direc]] == None:
+					out.append(adj2[direc])
 
 			
 			for i in (Dir.UP, Dir.DOWN):
 				if i in adj2.keys() and self.board[adj2[i]] != None and self.board[adj2[i]].team != self.team:
 					out.append(adj2[i])
 
-		if self.team == 'R':
+		if coord[0] in ['i','j','k','l','e','f','g','h'] and coord[1:] in ['9','10','11','12']:
+			if self.team == 'W':
+				direc = Dir.LEFT
+			if self.team == 'B':
+				direc = Dir.LEFT
+			if self.team == 'R':
+				direc = Dir.RIGHT
 			adj = dict(self.get_adjacent(coord))
-			adj2 = dict(self.get_adjacent(adj[Dir.RIGHT]))
-			if self.board[adj[Dir.RIGHT]] == None:
-				out.append(adj[Dir.RIGHT])
-				if coord[1:] == '11' and self.board[adj2[Dir.RIGHT]] == None:
-					out.append(adj2[Dir.RIGHT])
+			adj2 = dict(self.get_adjacent(adj[direc]))
+			if self.board[adj[direc]] == None:
+				out.append(adj[direc])
+				if coord[1:] == '11' and self.board[adj2[direc]] == None:
+					out.append(adj2[direc])
 
 			
 			for i in (Dir.UP, Dir.DOWN):

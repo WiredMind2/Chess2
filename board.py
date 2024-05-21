@@ -66,14 +66,15 @@ class Board(Movement):
 
 if __name__ == '__main__':
 	b = Board()
-	b['d3'] = Piece.from_name('P')('R', b.coords_to_index('d3'), b)
+	#b['b3'] = Piece.from_name('P')('R', b.coords_to_index('d3'), b)
 	#b['i7'] = None
 	#b['f1'] = None
 	#b['g1'] = None
 	#print(b['e1'].list_moves())
 	#print(b['e1'].roque())
-	b['f3'] = Piece.from_name('P')('R', b.coords_to_index('f3'), b)
-	print(b['f3'].list_moves())
+	a = 'j9'
+	b[a] = Piece.from_name('P')('B', b.coords_to_index(a), b)
+	print(b[a].list_moves())
 
 	assert b.coords_to_index('e8') == b.coords_to_index('i8')
 	assert b.coords_to_index('i9') == b.coords_to_index('d9')
