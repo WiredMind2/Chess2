@@ -18,8 +18,6 @@ class Board(Movement):
 			for j, p in enumerate(reversed(row)):
 				self.board[i][j] = Piece.from_name(p)('W', (j, i), self)
 
-		self.board[0][0] = None
-
 		# Black and red, reversed
 		for start, team in [(7, 'B'), (11, 'R')]:
 			for i, row in enumerate(START_ROWS):

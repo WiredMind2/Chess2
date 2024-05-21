@@ -7,7 +7,7 @@ START_ROWS = ('RNBKQBNR', 'PPPPPPPP')
 COLORS = {'W': ('#ffffff', '#000000'), 'B': ('#000000', '#ffffff'), 'R': ('#000000', '#ff0000')}
 
 # For how long can the engine compute the best move
-MAX_SEARCH_TIME = 5 # seconds
+MAX_SEARCH_TIME = 1 # seconds
 
 class Dir(enum.Enum):
 	UP = 0

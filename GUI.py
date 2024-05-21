@@ -4,15 +4,20 @@ import os
 import pygame
 
 from board import Board
+from bot import Bot
 from constants import COLORS, SCREEN_SIZE
+from mouv import Vec2
 from pieces import Piece
 
 class GUI:
-	def __init__(self) -> None:
+	def __init__(self, playable) -> None:
 		self.running = False
 		self.scale = 1
 		self.selected = None
+		self.possibilities = []
 		self.team_turn = 'W'
+		self.playable_teams = playable
+		self.bots = {}
 		self.update_group = pygame.sprite.Group()
 		self.update_board = True
 
@@ -30,6 +35,8 @@ class GUI:
 		self.load_pieces()
 		self.create_cache_cells()
 
+		self.init_bots()
+
 		self.running = True
 		self.mainloop()
 
@@ -44,7 +51,12 @@ class GUI:
 				if event.type == pygame.MOUSEBUTTONDOWN:
 					self.handle_click(event)
 
+			if not self.update_board: # Let it render once
+				if self.playable_teams[self.team_turn] is False:
+					self.play_bot()
+
 			self.render()
+
 
 			pygame.display.flip()
 
@@ -62,16 +74,43 @@ class GUI:
 			piece = self.board[cell]
 			print('Clicked on:', cell, piece)
 
-			if self.selected is None:
-				if piece is not None:
-					if piece.team == self.team_turn or True:
-						self.selected = cell
-						self.update_board = True
-			else:
-				if self.validate_move(self.selected, cell):
-					self.move(self.selected, cell)
-				self.selected = None
+			if self.playable_teams[self.team_turn] is True:
+				if piece is not None and piece.team == self.team_turn:
+					self.selected = cell
+					self.possibilities = piece.list_moves()
+				else:
+					if self.selected is not None:
+						if self.validate_move(self.selected, cell):
+							self.move(self.selected, cell)
+
+							teams = list(COLORS)
+							i = teams.index(self.team_turn)
+							self.team_turn = teams[(i+1)%3]
+
+						self.selected = None
+						self.possibilities = []
 				self.update_board = True
+
+	def play_bot(self):
+		# input('Check')
+		bot = self.bots[self.team_turn] # Should always be defined
+		src, dst = bot.get_move()
+		if src is None: # and dst is None
+			raise Exception(f'Bot {self.team_turn} couldn\'t find a move to play!')
+
+		a, b = self.board.index_to_coords(*src), self.board.index_to_coords(*dst)
+
+		if self.validate_move(a, b):
+			self.move(a, b)
+
+			teams = list(COLORS)
+			i = teams.index(self.team_turn)
+			self.team_turn = teams[(i+1)%3]
+		else:
+			print(f'Bot {self.team_turn} played an illegal move?? -> {a, b}')
+			pass
+
+		self.update_board = True
 
 
 	def render(self):
@@ -91,10 +130,20 @@ class GUI:
 		dest.center = self.screen.get_rect().center
 
 		surf = self.board_surf.copy()
+  
+		cells = []
 		if self.selected is not None:
-			poly = self.cache[self.selected]
-			poly = list(map(lambda e: (e+surf.get_rect().center).tuple(), poly))
-			pygame.draw.polygon(surf, 'blue', poly)
+			cells.append((self.selected, 'blue'))
+
+		if self.possibilities:
+			for cell in self.possibilities:
+				cells.append((cell, 'green'))
+
+		if cells:
+			for cell, color in cells:
+				poly = self.cache[cell]
+				poly = list(map(lambda e: (e+surf.get_rect().center).tuple(), poly))
+				pygame.draw.polygon(surf, color, poly)
 
 		self.screen.blit(surf, dest)
 
@@ -114,6 +163,13 @@ class GUI:
 		self.scale = dest.width / surf.get_rect().width
 
 		self.board_surf = pygame.transform.smoothscale(surf, dest.size)
+
+	def init_bots(self):
+		for team, playable in self.playable_teams.items():
+			if not playable:
+				bot = Bot(self.board, team)
+				self.bots[team] = bot
+				print(f'Initialized bot for {team} team')
 
 	@cache
 	def coords_to_pos(self, coords):
@@ -295,28 +351,40 @@ class GUI:
 	def move(self, src, dst):
 		piece = self.board[src]
 		piece2 = self.board[dst]
-  
+
 		print(f'Moving from {src} to {dst}')
 
-		if piece.type == 'K' and piece2.type == 'R':
+		if piece.type == 'K' and piece2.type == 'R' and piece.team == piece2.team:
 			# Castle
-			# TODO
-			pass
 
-		self.board[src] = None
-		if piece2 is not None:
-			# TODO - Handle score or whatever
-			piece2.pos = None
+			# TODO - Actually this doesn't work
+			p1 = self.board.coords_to_index(dst)
+			p2 = self.board.coords_to_index(src)
 
-			sprite = self.pieces[piece2]
-			sprite.kill()
+			self.board[dst] = piece
+			self.board[src] = piece2
+			piece.pos = p1
+			piece2.pos = p2
 
-		x, y = self.board.coords_to_index(dst)
+			sprite = piece2.sprite
+			
+			center = self.coords_to_pos(piece2.pos) + self.screen.get_rect().center
+			sprite.move(center)
+			self.update_group.add(sprite)
+		else:
+			self.board[src] = None
+			if piece2 is not None:
+				# TODO - Handle score or whatever
+				piece2.pos = None
 
-		self.board[dst] = piece
-		piece.pos = x, y
+				sprite = piece2.sprite
+				sprite.kill()
 
-		# sprite = self.pieces[piece]
+			x, y = self.board.coords_to_index(dst)
+
+			self.board[dst] = piece
+			piece.pos = x, y
+
 		sprite = piece.sprite
 		
 		center = self.coords_to_pos(piece.pos) + self.screen.get_rect().center
@@ -341,43 +409,6 @@ class GUI:
 			return True
 
 		return False
-
-class Vec2:
-	"""Helper to work with coordinates"""
-	def __init__(self, x, y=None):
-		if y is None:
-			x, y = x
-
-		self.x, self.y = x, y
-
-	def __add__(self, other):
-		if isinstance(other, tuple):
-			other = Vec2(other)
-		return Vec2(self.x+other.x, self.y+other.y)
-
-	def __sub__(self, other):
-		if isinstance(other, tuple):
-			other = Vec2(other)
-		return Vec2(self.x-other.x, self.y-other.y)
-
-	def __neg__(self):
-		return Vec2(-self.x, -self.y)
-
-	def __mul__(self, k):
-		return Vec2(self.x*k, self.y*k)
-
-	def __truediv__(self, k):
-		return Vec2(self.x/k, self.y/k)
-
-	def __repr__(self):
-		return f'({self.x}, {self.y})'
-
-	def __iter__(self):
-		return iter((self.x, self.y))
-
-	def tuple(self):
-		return self.x, self.y
-
 
 class PieceSprite(pygame.sprite.Sprite):
 	def __init__(self, piece, pos, scale, *groups) -> None:
@@ -430,5 +461,5 @@ def raytracing(pos, poly):
 	return inside
 
 if __name__ == "__main__":
-	gui = GUI()
+	gui = GUI({'W': False, 'R': False, 'B': False, })
 	gui.start()
