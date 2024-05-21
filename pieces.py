@@ -105,7 +105,14 @@ class Pawn(Piece):
 			for i in (Dir.UP, Dir.DOWN):
 				if i in adj2.keys() and self.board[adj2[i]] != None and self.board[adj2[i]].team != self.team:
 					out.append(adj2[i])
-		return out
+		out2 = []
+		for i in out:
+			if self.board[i] != None and self.board[i].type != 'King':
+				print(self.board[i].type)
+				out2.append(i)
+			elif self.board[i] == None:
+				out2.append(i)
+		return out2
 
 	def promotion(self):
 		x, y = self.pos
