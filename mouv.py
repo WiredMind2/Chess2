@@ -5,6 +5,8 @@ class Movement:
 
 	@classmethod
 	def coords_to_index(cls, coords):
+		if isinstance(coords, bytes):
+			coords = coords.decode()
 		if not isinstance(coords, str):
 			coords = cls.index_to_coords(*coords)
 
@@ -298,3 +300,40 @@ class Movement:
 	def is_check(self, src, dest):
 		# TODO - Check all kind of possible movements (queen + knight?) around each king in case there is a check
 		return False
+
+
+class Vec2:
+	"""Helper to work with coordinates"""
+	def __init__(self, x, y=None):
+		if y is None:
+			x, y = x
+
+		self.x, self.y = x, y
+
+	def __add__(self, other):
+		if isinstance(other, tuple):
+			other = Vec2(other)
+		return Vec2(self.x+other.x, self.y+other.y)
+
+	def __sub__(self, other):
+		if isinstance(other, tuple):
+			other = Vec2(other)
+		return Vec2(self.x-other.x, self.y-other.y)
+
+	def __neg__(self):
+		return Vec2(-self.x, -self.y)
+
+	def __mul__(self, k):
+		return Vec2(self.x*k, self.y*k)
+
+	def __truediv__(self, k):
+		return Vec2(self.x/k, self.y/k)
+
+	def __repr__(self):
+		return f'({self.x}, {self.y})'
+
+	def __iter__(self):
+		return iter((self.x, self.y))
+
+	def tuple(self):
+		return self.x, self.y

@@ -15,7 +15,7 @@ class Board(Movement):
 
 		# White
 		for i, row in enumerate(START_ROWS):
-			for j, p in enumerate(row):
+			for j, p in enumerate(reversed(row)):
 				self.board[i][j] = Piece.from_name(p)('W', (j, i), self)
 
 		# Black and red, reversed
@@ -23,9 +23,17 @@ class Board(Movement):
 			for i, row in enumerate(START_ROWS):
 				for j, p in enumerate(row):
 					self.board[start - i][j] = Piece.from_name(p)(team, (j, start-i), self)
-		
+
+	def iterate(self):
+		"""Iterate over all pieces"""
+		for row in self.board:
+			for piece in row:
+				if piece is not None:
+					yield piece
 
 	def get(self, i, j):
+		if not (0 <= i < len(self.board[0]) and 0 <= j < len(self.board)):
+			return None
 		return self.board[j][i]
 
 	def get_type(self, coord):
