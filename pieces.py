@@ -58,10 +58,18 @@ class Pawn(Piece):
 
 		for dx in (-1, 1):
 			c = self.board.get(x+dx, ny)
-			if c is not None and c.team != self.team and c.type != 'K':
+			if c is not None and c.team != self.team:
 				out.append(self.index_to_coords(x+dx, ny))
-		
+	
 		return out
+
+	def promotion(self):
+		x, y = self.pos
+		print(y)
+		if {'W': [7,11], 'B': [0,11], 'R': [0,7]}[self.team][0] == y or {'W': [7,11], 'B': [0,11], 'R': [0,7]}[self.team][1] == y:
+			new_type = str(input("Q,R,Q,B:  "))
+			self.board[self.pos] = Piece.from_name(new_type)(self.team, self.coords_to_index(self.pos), self.board)
+
 
 class Rook(Piece):
 	def list_moves(self):
@@ -108,10 +116,10 @@ class King(Piece):
 		return out 
 
 	def roque(self): # TODO - Check if mate
-		x,y = self.pos[0], self.pos[1]
+		x,y = self.pos
 		coord = self.index_to_coords(x,y)
 		out = []
-
+		
 		if self.board[coord].team == 'W' and coord == 'e1':
 			if self.board['f1'] == None and self.board['g1'] == None and self.board['h1'].team == "W":
 				out.append('g1')
@@ -128,7 +136,6 @@ class King(Piece):
 			if self.board['i8'] == None and self.board['j8'] == None and self.board['k8'] == None and self.board['l8'].team == "B":
 				out.append('j8')
 
-		return [] # TODO - Remove when GUI part is ready
 		return out
 
 class Queen(Piece):
