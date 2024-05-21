@@ -56,7 +56,7 @@ class Pawn(Piece):
 
 		for dx in (-1, 1):
 			c = self.board.get(x+dx, ny)
-			if c is not None and c.team != self.team:
+			if c is not None and c.team != self.team and c.type != 'K':
 				out.append(self.index_to_coords(x+dx, ny))
 		
 		return out
