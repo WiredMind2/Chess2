@@ -167,7 +167,7 @@ class Bishop(Piece):
 class Knight(Piece):
 	def list_moves(self):
 
-		x,y = self.pos[0], self.pos[1]
+		x,y = self.pos
 		coord = self.index_to_coords(x,y)
 
 		cant = []
@@ -190,5 +190,12 @@ class Knight(Piece):
 				out.append(each)
 			elif self.board[each].team != self.board[coord].team: 
 				out.append(each)
-				
+
+		out2 = []
+		center = ['i5','i9','e9','e4','d4','d5']
+		if coord in center:
+			for i in out:
+				if i not in center:
+					out2.append(i)
+			return out2
 		return out
