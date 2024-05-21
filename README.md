@@ -17,7 +17,7 @@ L'illustration ci-dessous présente le setup initial. Le placement des pièces e
 
 Dans notre jeu d'échecs à trois joueurs, vous pouvez choisir de jouer l'un des trois camps (blanc, noir ou rouge) et affronter un ordinateur ou vos amis ! Il est également possible de regarder trois ordinateurs s'affronter entre eux.
 
-### Comment jouer
+### Comment jouer ?
 
 1. **Sélection d'une pièce** : Cliquez sur la pièce que vous souhaitez déplacer.
 2. **Déplacement** : Cliquez ensuite sur la case où vous souhaitez déplacer la pièce. Assurez-vous que la case choisie est atteignable par la pièce sélectionnée conformément aux règles de déplacement des échecs.
