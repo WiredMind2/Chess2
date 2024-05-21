@@ -56,9 +56,9 @@ class Pawn(Piece):
 				direc = Dir.RIGHT
 			adj = dict(self.get_adjacent(coord))
 			adj2 = dict(self.get_adjacent(adj[direc]))
+
 			if self.board[adj[direc]] == None:
 				out.append(adj[direc])
-				print(coord[1])
 				if coord[1] == '2' and self.board[adj2[direc]] == None:
 					out.append(adj2[direc])
 
@@ -96,12 +96,12 @@ class Pawn(Piece):
 				direc = Dir.RIGHT
 			adj = dict(self.get_adjacent(coord))
 			adj2 = dict(self.get_adjacent(adj[direc]))
+
 			if self.board[adj[direc]] == None:
 				out.append(adj[direc])
 				if coord[1:] == '11' and self.board[adj2[direc]] == None:
 					out.append(adj2[direc])
 
-			
 			for i in (Dir.UP, Dir.DOWN):
 				if i in adj2.keys() and self.board[adj2[i]] != None and self.board[adj2[i]].team != self.team:
 					out.append(adj2[i])
