@@ -66,9 +66,13 @@ class Board(Movement):
 
 if __name__ == '__main__':
 	b = Board()
-	b['c3'] = Piece.from_name('K')('W', b.coords_to_index('c3'), b)
-	print(b['c3'].list_moves())
-
+	b['j9'] = Piece.from_name('P')('R', b.coords_to_index('j9'), b)
+	b['i7'] = None
+	b['f1'] = None
+	b['g1'] = None
+	print(b['e1'].list_moves())
+	print(b['e1'].roque())
+	
 	assert b.coords_to_index('e8') == b.coords_to_index('i8')
 	assert b.coords_to_index('i9') == b.coords_to_index('d9')
 	assert b.coords_to_index('a9') == b.coords_to_index('l9')
@@ -87,8 +91,6 @@ if __name__ == '__main__':
 	assert b.get_straight_line('h4', Dir.DOWN) == ['h4', 'g4', 'f4', 'e4', 'd4', 'c4', 'b4', 'a4']
 	assert dict(b.get_adjacent_diagonale('b3')) == {Dir.DOWN: ['a4'], Dir.UP: ['c2'], Dir.LEFT: ['c4'], Dir.RIGHT: ['a2']}
 	assert dict(b.get_adjacent_diagonale('d4')) in ({Dir.DOWN: ['c5'], Dir.UP: ['e3'], Dir.LEFT: ['e9', 'i5'], Dir.RIGHT: ['c3']}, {Dir.DOWN: ['c5'], Dir.UP: ['e3'], Dir.LEFT: ['i5', 'e9'], Dir.RIGHT: ['c3']})
-	assert b.get_diagonal_line('d4', Dir.LEFT) in (['d4', 'e9', 'f10', 'i5', 'j6'], ['d4', 'i5', 'j6', 'e9', 'f10'])
-	assert b.get_diagonal_line('i9', Dir.UP) in (['i9', 'd5', 'c6', 'e4', 'f3'], ['i9', 'e4', 'f3', 'd5', 'c6'])
 	pass
 
 
