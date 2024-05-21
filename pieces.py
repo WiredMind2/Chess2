@@ -107,7 +107,7 @@ class Pawn(Piece):
 					out.append(adj2[i])
 		out2 = []
 		for i in out:
-			if self.board[i] != None and self.board[i].type != 'King':
+			if self.board[i] != None and self.board[i].type != 'King' and self.board[i].team != self.board[coord].team:
 				print(self.board[i].type)
 				out2.append(i)
 			elif self.board[i] == None:
