@@ -24,6 +24,7 @@ class Board(Movement):
 				for j, p in enumerate(row):
 					self.board[start - i][j] = Piece.from_name(p)(team, (j, start-i), self)
 
+
 	def iterate(self):
 		"""Iterate over all pieces"""
 		for row in self.board:

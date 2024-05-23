@@ -26,6 +26,10 @@ class Piece(Movement):
 
 		return cell in self.list_moves() # /!\ Just for testing, should be optimized for each piece
 
+	def check_promotion(self):
+		# Just cause it's easier like this
+		return False
+
 	@classmethod
 	def from_name(self, name):
 		names = {
@@ -60,15 +64,25 @@ class Pawn(Piece):
 			c = self.board.get(x+dx, ny)
 			if c is not None and c.team != self.team:
 				out.append(self.index_to_coords(x+dx, ny))
-	
+
 		return out
 
-	def promotion(self):
+	def check_promotion(self):
 		x, y = self.pos
-		print(y)
-		if {'W': [7,11], 'B': [0,11], 'R': [0,7]}[self.team][0] == y or {'W': [7,11], 'B': [0,11], 'R': [0,7]}[self.team][1] == y:
-			new_type = str(input("Q,R,Q,B:  "))
-			self.board[self.pos] = Piece.from_name(new_type)(self.team, self.coords_to_index(self.pos), self.board)
+		dico = {'W': [7,11], 'B': [0,11], 'R': [0,7]}
+
+		return y in dico[self.team]
+
+	def promote(self, choice):
+		if choice not in 'QNRB':
+			raise ValueError('Invalid promotion choice') # If you see this, then someone tried to be smart and failed
+
+		new_piece = Piece.from_name(choice)(self.team, self.coords_to_index(self.pos), self.board)
+		self.board[self.pos] = new_piece
+		new_piece.sprite = self.sprite
+		new_piece.sprite.piece = new_piece
+		new_piece.sprite.update_image()
+
 
 
 class Rook(Piece):

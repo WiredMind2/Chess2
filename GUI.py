@@ -5,7 +5,7 @@ import pygame
 
 from board import Board
 from bot import Bot
-from constants import COLORS, SCREEN_SIZE, TEAMS
+from constants import COLORS, POPUP_SIZE, SCREEN_SIZE, TEAMS
 from mouv import Vec2
 from pieces import Piece
 
@@ -56,7 +56,6 @@ class GUI:
 					self.play_bot()
 
 			self.render()
-
 
 			pygame.display.flip()
 
@@ -118,7 +117,7 @@ class GUI:
 			self.screen.fill("purple")
 			self.render_board()
 
-			self.piece_sprites.update()
+			# self.piece_sprites.update()
 			rects = self.piece_sprites.draw(self.screen)
 			self.update_group.empty()
 
@@ -151,6 +150,7 @@ class GUI:
 		for piece in self.board.iterate():
 			dest = self.coords_to_pos(piece.pos) + self.screen.get_rect().center # Centers the image
 			sprite = PieceSprite(piece, dest.tuple(), self.scale, self.piece_sprites, self.update_group)
+			# No need to save it since it's already in the sprite group
 			# self.pieces[piece] = sprite
 
 	def load_board(self):
@@ -384,6 +384,10 @@ class GUI:
 			self.board[dst] = piece
 			piece.pos = x, y
 
+		if piece.check_promotion() is True:
+			choice = self.promotion_popup()
+			piece.promote(choice) # If check_promotion is True then this exists
+
 		sprite = piece.sprite
 		
 		center = self.coords_to_pos(piece.pos) + self.screen.get_rect().center
@@ -409,34 +413,77 @@ class GUI:
 
 		return False
 
+	def promotion_popup(self):
+		# We're going to override the mainloop here
+		# This is a bad idea, but we're pro here so it's fine.
+
+		# Draw popup
+		popup = pygame.Surface(POPUP_SIZE)
+		choices = 'QRNB'
+		borders = 10
+		cell_size = (POPUP_SIZE[0]-borders)/len(choices)-borders, POPUP_SIZE[1]-borders*2
+		sprites = []
+		cell_rects = {}
+		for i, choice in enumerate(choices):
+			topleft = (POPUP_SIZE[0]-borders)*i/len(choices) + borders, borders
+			cell_rect = pygame.Rect((topleft, cell_size))
+			pygame.draw.rect(popup, 'gray', cell_rect)
+   
+			cell_rects[choice] = cell_rect
+
+			piece = Piece.from_name(choice)(self.team_turn, None, None)
+			sprite = PieceSprite(piece, (0, 0), self.scale)
+			surf = sprite.image
+			rect = surf.get_rect()
+			rect.center = cell_rect.center
+
+			sprites.append((surf, rect))
+
+		popup.blits(sprites)
+		main_rect = popup.get_rect()
+		main_rect.center = self.screen.get_rect().center
+  
+		self.screen.blit(popup, main_rect.topleft)
+
+		pygame.display.flip()
+
+		# Override mainloop to force pause EVERYTHING, without crashing the game
+		while self.running:
+			for event in pygame.event.get():
+				if event.type == pygame.QUIT:
+					self.running = False
+
+				if event.type == pygame.MOUSEBUTTONDOWN:
+					# Mouse click
+					if event.button == 1:
+						x, y = list(map(lambda e: e[0]-e[1], zip(event.pos, main_rect.topleft)))
+						for choice, rect in cell_rects.items():
+							if rect.collidepoint(x, y) is True:
+								print(f'Promotion choice: {choice}')
+								self.update_board = True
+								return choice
+
+			# Nothing changes until we got a valid click, so no need to refresh the screen
+			self.clock.tick(60)
+
 class PieceSprite(pygame.sprite.Sprite):
 	def __init__(self, piece, pos, scale, *groups) -> None:
 		super().__init__(*groups)
 		self.piece = piece
 		self.piece.sprite = self
+		self.scale = scale
 
-		full_team = TEAMS[piece.team]
-		path = os.path.join('assets', 'pieces', f'{full_team}-{piece.__class__.__name__.lower()}.png')
-		surf = pygame.image.load(path)
-
-		if False: # Not needed anymore
-			if piece.team != 'W': # TODO - Should delete when other pieces images are available
-				fill, border = COLORS[piece.team]
-
-				surf = surf.copy()
-				for x in range(surf.get_width()):
-					for y in range(surf.get_height()):
-						r, g, b, a = surf.get_at((x, y))
-						if a > 0:
-							if (r, g, b) == (255, 255, 255):
-								surf.set_at((x, y), pygame.Color(fill))
-							elif (r, b, g) == (0, 0, 0):
-								surf.set_at((x, y), pygame.Color(border))
-
-		self.image = pygame.transform.smoothscale_by(surf, scale/2)
+		self.update_image()
 
 		self.rect = self.image.get_rect()
 		self.rect.center = pos
+
+	def update_image(self):
+		full_team = TEAMS[self.piece.team]
+		path = os.path.join('assets', 'pieces', f'{full_team}-{self.piece.__class__.__name__.lower()}.png')
+		surf = pygame.image.load(path)
+
+		self.image = pygame.transform.smoothscale_by(surf, self.scale/2)
 
 	def move(self, dst):	
 		if isinstance(dst, Vec2):
