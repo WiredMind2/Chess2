@@ -80,7 +80,7 @@ class GUI:
 				else:
 					if self.selected is not None:
 						if self.validate_move(self.selected, cell):
-							self.move(self.selected, cell)
+							self.move(self.selected, cell)	
 
 							teams = list(COLORS)
 							i = teams.index(self.team_turn)

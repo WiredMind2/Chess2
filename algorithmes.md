@@ -19,6 +19,11 @@ Un algorithme qui est devenu très populaire depuis la sortie des cartes graphiq
 Nous utilisons cette algorithme pour autre chose par contre:
 Lors d'un clic de la souris, on lance un laser depuis les coordonnees du clic qui se deplace vers la gauche jusqu'a l'infini. On compte combien de fois il traverse chaque arete de chaque case. Il existe un theoreme (nom a retrouver) qui dit que si le laser traverse un nombre pair de fois les aretes d'une forme fermee, alors l'origine du laser se trouve a l'exterieur de la forme. Sinon si c'est impair, alors l'origine est a l'interieur et donc on a clique a l'interieur de la case correspondante.
 
+expliquer comment tu transposes cette technologie à notre problème.
+pourquoi ? but final est de déterminer où est ce que je clic pour ainsi sélectionner une case. Ca aurait été trivial si tout était carré mais là, formes irrégulières
+
+Le ray tracing, ou traçage de rayons, est une technique informatique pour générer des images en simulant la propagation de la lumière dans le monde réel. Le processus commence par le lancer de rayons depuis la caméra virtuelle à travers chaque pixel de l'image. Ces rayons interagissent avec les objets de la scène, subissant des réflexions, des réfractions et d'autres effets optiques. Les calculs récursifs sont souvent nécessaires pour suivre les chemins complexes de la lumière, comme les réflexions multiples ou la transmission à travers des matériaux transparents. Une fois tous les calculs effectués, la couleur finale de chaque pixel est déterminée en combinant les contributions de lumière de différentes sources. Malgré sa demande élevée en puissance de calcul, le ray tracing offre des rendus visuellement impressionnants avec des effets réalistes de lumière et de matériaux.
+
 UCI:
 Techniquement un protocole plus qu'un algo mais vasy c'est non trivial.
 Universal Chess Interface, UCI, est le protocole permettant à notre IA d'interagir avec Stockfish. 
