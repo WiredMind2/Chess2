@@ -4,8 +4,9 @@ from mouv import Movement
 
 
 class Piece(Movement):
-
-	"""Base class for all chess pieces, handling initialization, representation, and move validation."""
+	"""
+	Base class for all chess pieces, handling initialization, representation, and move validation.
+	"""
 
 	def __init__(self, team, pos, board):
 		self.team = team
@@ -20,15 +21,15 @@ class Piece(Movement):
 
 	def list_moves(self):
 		'''
-		Return a list of all the possible moves for the given piece
-		Should return a list of strings
+		Return a list of all the possible moves for the given piece.
+		Should return a list of strings.
 		'''
 		raise NotImplementedError # Should be overwritten
-  
+
 	def validate_move(self, cell):
 		'''
-		Check if that piece is allowed to go to the given cell
-		Returns a bool
+		Check if that piece is allowed to go to the given cell.
+		Returns a bool.
 		'''
 		return cell in self.list_moves() # /!\ Just for testing, should be optimized for each piece
 
@@ -47,109 +48,134 @@ class Piece(Movement):
 
 
 class Pawn(Piece):
-
 	"""
-    Class representing a Pawn piece.
-    """
+	Class representing a Pawn piece.
+	"""
 
 	def list_moves(self):
-
 		"""
-		returns a list of boxes on which the pawn can move
-        """
-		
-		out  = []
+		Returns a list of boxes on which the pawn can move.
+		"""
+		out = []
 
-		x,y = self.pos
-		coord = self.index_to_coords(x,y)
+		x, y = self.pos
+		coord = self.index_to_coords(x, y)
 
-		if coord[0] in ['a','b','c','d','e','f','g','h' ] and coord[1:] in ['1','2','3','4']: # check which region the pawn is in
+		if coord[0] in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] and coord[1:] in ['1', '2', '3', '4']:
+			# check which region the pawn is in
 
-			if self.team == 'W': # finds the direction of movement according to the colour of the pawn
+			if self.team == 'W':
+				# finds the direction of movement according to the colour of the pawn
 				direc = Dir.LEFT
 			if self.team == 'B':
 				direc = Dir.RIGHT
 			if self.team == 'R':
 				direc = Dir.RIGHT
-			adj = dict(self.get_adjacent(coord)) # finds the boxes adjacent to his
-			adj2 = dict(self.get_adjacent(adj[direc])) # find the boxes adjacent to the one in front of him 
+			adj = dict(self.get_adjacent(coord))
+			# finds the boxes adjacent to his
+			adj2 = dict(self.get_adjacent(adj[direc]))
+			# find the boxes adjacent to the one in front of him
 
-			if self.board[adj[direc]] == None: # add the one in front of him if it is empty
+			if self.board[adj[direc]] == None:
+				# add the one in front of him if it is empty
 				out.append(adj[direc])
-				if coord[1] == '2' and self.board[adj2[direc]] == None: # adds the second in front of him if it is empty and it is first movement
+				if coord[1] == '2' and self.board[adj2[direc]] == None:
+					# adds the second in front of him if it is empty and it is first movement
 					out.append(adj2[direc])
 
-			
-			for i in (Dir.UP, Dir.DOWN): # adds diagonal squares in front of him if he can eat pieces
+			for i in (Dir.UP, Dir.DOWN):
+				# adds diagonal squares in front of him if he can eat pieces
 				if i in adj2.keys() and self.board[adj2[i]] != None and self.board[adj2[i]].team != self.team and self.board[adj2[i]].type != 'King':
 					out.append(adj2[i])
 
-		if coord[0] in ['a','b','c','d','i','j','k','l'] and coord[1:] in ['5','6','7','8']:  # check which region the pawn is in
-			
-			if self.team == 'W': # finds the direction of movement according to the colour of the pawn
+		if coord[0] in ['a', 'b', 'c', 'd', 'i', 'j', 'k', 'l'] and coord[1:] in ['5', '6', '7', '8']:
+			# check which region the pawn is in
+
+			if self.team == 'W':
+				# finds the direction of movement according to the colour of the pawn
 				direc = Dir.LEFT
 			if self.team == 'B':
 				direc = Dir.RIGHT
 			if self.team == 'R':
 				direc = Dir.LEFT
-			adj = dict(self.get_adjacent(coord)) # finds the boxes adjacent to his
-			adj2 = dict(self.get_adjacent(adj[direc])) # find the boxes adjacent to the one in front of him 
+			adj = dict(self.get_adjacent(coord))
+			# finds the boxes adjacent to his
+			adj2 = dict(self.get_adjacent(adj[direc]))
+			# find the boxes adjacent to the one in front of him
 
-			if self.board[adj[direc]] == None: # add the one in front of him if it is empty
+			if self.board[adj[direc]] == None:
+				# add the one in front of him if it is empty
 				out.append(adj[direc])
-				if coord[1:] == '7' and self.board[adj2[direc]] == None: # adds the second in front of him if it is empty and it is first movement
+				if coord[1:] == '7' and self.board[adj2[direc]] == None:
+					# adds the second in front of him if it is empty and it is first movement
 					out.append(adj2[direc])
 
-			
-			for i in (Dir.UP, Dir.DOWN): # adds diagonal squares in front of him if he can eat pieces
+			for i in (Dir.UP, Dir.DOWN):
+				# adds diagonal squares in front of him if he can eat pieces
 				if i in adj2.keys() and self.board[adj2[i]] != None and self.board[adj2[i]].team != self.team and self.board[adj2[i]].type != 'King':
 					out.append(adj2[i])
 
-		if coord[0] in ['i','j','k','l','e','f','g','h'] and coord[1:] in ['9','10','11','12']:# check which region the pawn is in
+		if coord[0] in ['i', 'j', 'k', 'l', 'e', 'f', 'g', 'h'] and coord[1:] in ['9', '10', '11', '12']:
+			# check which region the pawn is in
 
-			if self.team == 'W': # finds the direction of movement according to the colour of the pawn
+			if self.team == 'W':
+				# finds the direction of movement according to the colour of the pawn
 				direc = Dir.LEFT
 			if self.team == 'B':
 				direc = Dir.LEFT
 			if self.team == 'R':
 				direc = Dir.RIGHT
-			adj = dict(self.get_adjacent(coord)) # finds the boxes adjacent to his
-			adj2 = dict(self.get_adjacent(adj[direc])) # find the boxes adjacent to the one in front of him 
+			adj = dict(self.get_adjacent(coord))
+			# finds the boxes adjacent to his
+			adj2 = dict(self.get_adjacent(adj[direc]))
+			# find the boxes adjacent to the one in front of him
 
-			if self.board[adj[direc]] == None: # add the one in front of him if it is empty
+			if self.board[adj[direc]] == None:
+				# add the one in front of him if it is empty
 				out.append(adj[direc])
-				if coord[1:] == '11' and self.board[adj2[direc]] == None: # adds the second in front of him if it is empty and it is first movement
+				if coord[1:] == '11' and self.board[adj2[direc]] == None:
+					# adds the second in front of him if it is empty and it is first movement
 					out.append(adj2[direc])
 
-			for i in (Dir.UP, Dir.DOWN): # adds diagonal squares in front of him if he can eat pieces
+			for i in (Dir.UP, Dir.DOWN):
+				# adds diagonal squares in front of him if he can eat pieces
 				if i in adj2.keys() and self.board[adj2[i]] != None and self.board[adj2[i]].team != self.team:
 					out.append(adj2[i])
-		
-		return out # returns the list containing the coordinates of the boxes on which it can move
+
+		return out
+		# returns the list containing the coordinates of the boxes on which it can move
 
 	def promotion(self):
 		"""
-        Promote the Pawn if it reaches the end of the board.
-        """
+		Promote the Pawn if it reaches the end of the board.
+		"""
 		x, y = self.pos
 
-		if {'W': [7,11], 'B': [0,11], 'R': [0,7]}[self.team][0] == y or {'W': [7,11], 'B': [0,11], 'R': [0,7]}[self.team][1] == y:  # check that the pawn is at the edge of the board
+		if {'W': [7, 11], 'B': [0, 11], 'R': [0, 7]}[self.team][0] == y or {'W': [7, 11], 'B': [0, 11], 'R': [0, 7]}[self.team][1] == y:
+			# check that the pawn is at the edge of the board
 
-			new_type = str(input("Q,R,Q,B:  ")) # need modification
+			new_type = str(input("Q,R,Q,B:  "))  # need modification
 
-			self.board[self.pos] = Piece.from_name(new_type)(self.team, self.coords_to_index(self.pos), self.board) # change it type
+			self.board[self.pos] = Piece.from_name(new_type)(self.team, self.coords_to_index(self.pos), self.board)
+			# change its type
 
 
 class Rook(Piece):
 	"""
-    Class representing a Rook piece.
-    """
+	Class representing a Rook piece.
+
+	Inherits from the Piece class.
+	"""
+
 	def list_moves(self):
 		"""
-		returns a list of boxes on which the rook can move
-        """
-		def recur(pos, dir):
+		Returns a list of boxes on which the rook can move.
 
+		The rook can move horizontally or vertically in any direction,
+		as long as there are no obstacles in its path.
+		"""
+
+		def recur(pos, dir):
 			"""
 			Recursively find valid moves in a given direction.
 
@@ -165,75 +191,104 @@ class Rook(Piece):
 			adj = adjs.get(dir, None)
 			if adj is not None:
 				if self.board[adj] is None:
-					return [adj] + recur(adj, dir) # Continue in the same direction
+					return [adj] + recur(adj, dir)  # Continue in the same direction
 				elif self.board[adj].team != self.team:
-					return [adj] # Capture an opponent's piece
-			return [] # No further moves in this direction
+					return [adj]  # Capture an opponent's piece
+			return []  # No further moves in this direction
 
 		out = []
 		for dir in list(Dir):
-			out += recur(self.pos, dir) # Check all directions
+			out += recur(self.pos, dir)  # Check all directions
 		return out
 
 class King(Piece):
 	"""
-    Class representing a Rook piece.
-    """
+	Class representing a King piece.
+	"""
+
 	def list_moves(self):
 		"""
-		returns a list of boxes on which the king can move
-        """
-		x,y = self.pos[0], self.pos[1]
-		coord = self.index_to_coords(x,y)
+		Returns a list of boxes on which the king can move.
+		"""
+		x, y = self.pos[0], self.pos[1]
+		coord = self.index_to_coords(x, y)
 		posibilities = self.get_adjacent(coord)
 
 		out = []
-		for posibilitie in posibilities: # check if it can goes on the boxes in front of it, behind it and on the sides
-			
+		for posibilitie in posibilities:  # check if it can go on the boxes in front of it, behind it and on the sides
 			if self.board[posibilitie[1]] == None:
 				out.append(posibilitie[1])
-			elif self.board[posibilitie[1]].team != self.board[coord].team: 
+			elif self.board[posibilitie[1]].team != self.board[coord].team:
 				out.append(posibilitie[1])
 
-		
-		posibilities2 = self.get_adjacent_diagonale(coord) 
+		posibilities2 = self.get_adjacent_diagonale(coord)
 
-		for posibilitie in posibilities2: # check if it can goes on the boxes on the diagonals
+		for posibilitie in posibilities2:  # check if it can go on the boxes on the diagonals
 			for each in posibilitie[1]:
 				if self.board[each] == None:
 					out.append(each)
-				elif self.board[each].team != self.board[coord].team and self.board[each].type != self.board[coord].type: 
+				elif (
+					self.board[each].team != self.board[coord].team
+					and self.board[each].type != self.board[coord].type
+				):
 					out.append(each)
 
-		out += self.roque() # add the boxes where it can rook if it can
+		out += self.roque()  # add the boxes where it can rook if it can
 
-		return out 
+		return out
 
-	def roque(self): 
+	def roque(self):
 		"""
 		Determine the valid castling moves for the piece.
 		"""
-		x,y = self.pos
-		coord = self.index_to_coords(x,y)
+		x, y = self.pos
+		coord = self.index_to_coords(x, y)
 		out = []
-		
+
 		# check the both cases for each teams
-	
-		if self.board[coord].team == 'W' and coord == 'e1':
-			if self.board['f1'] == None and self.board['g1'] == None and self.board['h1'].team == "W":
-				out.append('g1')
-			if self.board['d1'] == None and self.board['c1'] == None and self.board['b1'] == None and self.board['a1'].team == "W":
-				out.append('c1')
-		elif self.board[coord].team == 'R' and coord == 'i12':
-			if self.board['f12'] == None and self.board['g12'] == None and self.board['h12'].team == "R":
-				out.append('g12')
-			if self.board['i12'] == None and self.board['j12'] == None and self.board['k12'] == None and self.board['l12'].team == "R":
-				out.append('j12')
-		elif self.board[coord].team == 'B' and coord == 'd8':
-			if self.board['c8'] == None and self.board['b8'] == None and self.board['a8'].team == "B":
-				out.append('b8')
-			if self.board['i8'] == None and self.board['j8'] == None and self.board['k8'] == None and self.board['l8'].team == "B":
-				out.append('j8')
+
+		if self.board[coord].team == "W" and coord == "e1":
+			if (
+				self.board["f1"] == None
+				and self.board["g1"] == None
+				and self.board["h1"].team == "W"
+			):
+				out.append("g1")
+			if (
+				self.board["d1"] == None
+				and self.board["c1"] == None
+				and self.board["b1"] == None
+				and self.board["a1"].team == "W"
+			):
+				out.append("c1")
+		elif self.board[coord].team == "R" and coord == "i12":
+			if (
+				self.board["f12"] == None
+				and self.board["g12"] == None
+				and self.board["h12"].team == "R"
+			):
+				out.append("g12")
+			if (
+				self.board["i12"] == None
+				and self.board["j12"] == None
+				and self.board["k12"] == None
+				and self.board["l12"].team == "R"
+			):
+				out.append("j12")
+		elif self.board[coord].team == "B" and coord == "d8":
+			if (
+				self.board["c8"] == None
+				and self.board["b8"] == None
+				and self.board["a8"].team == "B"
+			):
+				out.append("b8")
+			if (
+				self.board["i8"] == None
+				and self.board["j8"] == None
+				and self.board["k8"] == None
+				and self.board["l8"].team == "B"
+			):
+				out.append("j8")
 
 		return out
 
@@ -275,40 +330,41 @@ class Bishop(Piece):
 	
 class Knight(Piece):
 	"""
-    Class representing a knight piece.
-    """
+	Class representing a knight piece.
+	"""
+
 	def list_moves(self):
 		"""
-		returns a list of boxes on which the knight can move.
-        """
-		x,y = self.pos
-		coord = self.index_to_coords(x,y)
+		Returns a list of boxes on which the knight can move.
+		"""
+		x, y = self.pos
+		coord = self.index_to_coords(x, y)
 
-		cant = [] # Squares adjacent to the knight's current position
+		cant = []  # Squares adjacent to the knight's current position
 		for one in self.get_adjacent(coord):
 			cant.append(one[1])
 
-		step = [] # Potential knight moves
+		step = []  # Potential knight moves
 		a = list(self.get_adjacent_diagonale(coord))
 		for one in a:
 			for two in one[1]:
 				step.append(two)
 
-		can = []	# Valid knight moves
+		can = []  # Valid knight moves
 		for each in step:
 			for one in self.get_adjacent(each):
 				if one[1] not in cant:
 					can.append(one[1])
 
-		out = [] # valid and possible movement
+		out = []  # Valid and possible movement
 		for each in can:
 			if self.board[each] == None:
 				out.append(each)
-			elif self.board[each].team != self.board[coord].team: 
+			elif self.board[each].team != self.board[coord].team:
 				out.append(each)
 
-		out2 = [] # Special rules for the center squares
-		center = ['i5','i9','e9','e4','d4','d5']
+		out2 = []  # Special rules for the center squares
+		center = ['i5', 'i9', 'e9', 'e4', 'd4', 'd5']
 		if coord in center:
 			for i in out:
 				if i not in center:
