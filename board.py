@@ -4,13 +4,18 @@ from mouv import Movement
 from pieces import Piece
 
 class Board(Movement):
-	"""Représente le plateau de jeu, avec les positions de chaque pion.
+	"""Represents the game board with the positions of each piece.
+
+	Attributes:
+		board (list): A 2D list representing the game board.
 	"""
+
 	def __init__(self):
 		super().__init__()
 		self.reset()
 
 	def reset(self):
+		"""Resets the game board to its initial state."""
 		self.board = [[None for _ in range(BOARD_SIZE)] for _ in range(int(BOARD_SIZE * 1.5))] # Number, then letter -> /!\ reverse
 
 		# White
@@ -25,27 +30,38 @@ class Board(Movement):
 					self.board[start - i][j] = Piece.from_name(p)(team, (j, start-i), self)
 
 	def iterate(self):
-		"""Iterate over all pieces"""
+		"""Iterates over all pieces on the game board.
+
+		Yields:
+			Piece: The next piece on the game board.
+		"""
 		for row in self.board:
 			for piece in row:
 				if piece is not None:
 					yield piece
 
 	def get(self, i, j):
+		"""Gets the piece at the specified coordinates on the game board.
+
+		Args:
+			i (int): The column index.
+			j (int): The row index.
+
+		Returns:
+			Piece|None: The piece at the specified coordinates, or None if the coordinates are out of bounds.
+		"""
 		if not (0 <= i < len(self.board[0]) and 0 <= j < len(self.board)):
 			return None
 		return self.board[j][i]
 
 	def get_type(self, coord):
-		"""
-		Parameters
-		----------
-		board : La liste représentant le plateau du jeu
+		"""Gets the type of piece at the specified coordinates on the game board.
 
-		Returns
-		-------
-		Le type de pièce qu'on a séléctionné
+		Args:
+			coord (tuple): The coordinates of the piece.
 
+		Returns:
+			str|None: The type of piece at the specified coordinates, or None if there is no piece at the coordinates.
 		"""
 		x, y = self.coords_to_index(coord)
 		if self.board[y][x] != None:
@@ -54,13 +70,24 @@ class Board(Movement):
 			return None
 
 	def __getitem__(self, coords)-> Piece|None:
-		""" val = dico['e5'] """
-		
+		"""Gets the piece at the specified coordinates on the game board using the square bracket notation.
+
+		Args:
+			coords (str): The coordinates of the piece in algebraic notation.
+
+		Returns:
+			Piece|None: The piece at the specified coordinates, or None if the coordinates are out of bounds.
+		"""
 		x, y = self.coords_to_index(coords)
 		return self.board[y][x]
 
 	def __setitem__(self, coords, value):
-		""" dico['e5'] = 'K' """
+		"""Sets the piece at the specified coordinates on the game board using the square bracket notation.
+
+		Args:
+			coords (str): The coordinates of the piece in algebraic notation.
+			value (Piece): The piece to be placed at the specified coordinates.
+		"""
 		x, y = self.coords_to_index(coords)
 		self.board[y][x] = value
 
