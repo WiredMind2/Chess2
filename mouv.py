@@ -297,9 +297,28 @@ class Movement:
 
 		return False
 
-	def is_check(self, src, dest):
-		# TODO - Check all kind of possible movements (queen + knight?) around each king in case there is a check
-		return False
+	def is_check(self, board, team,  src = None, dest = None ):
+					
+		is_check = False
+		if src == None and dest == None:
+			
+			list_kings = []
+			#find all the kings
+			for row in board:
+				for piece in row:
+					if piece != None and piece.type == 'K' and piece.team == team:
+						list_kings.append(piece)
+
+			for king in list_kings:
+				for row in board: 
+					for piece in row:
+						if piece != None and piece.type != 'K' and piece.team != king.team:
+							is_check = True
+							return 		
+		else:
+			if dest in src.list_moves():
+				return True 				
+		
 
 
 class Vec2:
