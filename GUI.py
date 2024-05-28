@@ -120,7 +120,7 @@ class GUI:
 			self.screen.fill("purple")
 			self.render_board()
 
-			self.piece_sprites.update()
+			#self.piece_sprites.update()
 			rects = self.piece_sprites.draw(self.screen)
 			self.update_group.empty()
 
@@ -183,7 +183,7 @@ class GUI:
 			dest = self.coords_to_pos(piece.pos) + self.screen.get_rect().center # Centers the image
 			sprite = PieceSprite(piece, dest.tuple(), self.scale, self.piece_sprites, self.update_group)
 			# No need to save it since it's already in the sprite group
-			# self.pieces[piece] = sprite
+			self.pieces[piece] = sprite
 
 	def load_board(self):
 		surf = pygame.image.load(os.path.join('assets', 'board.png'))
