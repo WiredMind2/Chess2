@@ -1,5 +1,5 @@
 import string
-from constants import BOARD_SIZE, START_ROWS, Dir
+from constants import START_ROWS, Dir
 from mouv import Movement
 from pieces import Piece
 
@@ -16,7 +16,7 @@ class Board(Movement):
 
 	def reset(self):
 		"""Resets the game board to its initial state."""
-		self.board = [[None for _ in range(BOARD_SIZE)] for _ in range(int(BOARD_SIZE * 1.5))] # Number, then letter -> /!\ reverse
+		self.board = [[None for _ in range(8)] for _ in range(12)] # Number, then letter -> /!\ reverse
 
 		# White
 		for i, row in enumerate(START_ROWS):
@@ -28,6 +28,7 @@ class Board(Movement):
 			for i, row in enumerate(START_ROWS):
 				for j, p in enumerate(row):
 					self.board[start - i][j] = Piece.from_name(p)(team, (j, start-i), self)
+
 
 	def iterate(self):
 		"""Iterates over all pieces on the game board.
