@@ -337,7 +337,7 @@ class Movement:
 				for piece in row:
 					if piece != None:
 						if piece.type == 'K' and piece.team == team:
-							list_kings.append(piece)
+							list_kings.append(piece.pos)
 
 			for king in list_kings:
 				for row in board: 
@@ -345,11 +345,21 @@ class Movement:
 						if piece != None and piece.type != 'K' and piece.team != king.team and king in piece.list_moves():
 							is_check = True
 		else:
-			if dest in board[src].list_moves():
+			list_kings = []
+			#find all the kings
+			for row in board:
+				for piece in row:
+					if piece != None:
+						if piece.type == 'K' and piece.team == team:
+							list_kings.append(piece.pos)
+			if dest in list_kings:
 				is_check = True	
 		return is_check
 
 	def is_checkmate(self):
+
+		checkmate = False
+
 		list_kings = []
 
 		#find all the kings
@@ -377,7 +387,16 @@ class Movement:
 					if piece != None and piece.team == king.team:
 						for move in piece.list_moves():
 							new_board = self.board.copy()
-		return False
+							if not new_board.move(piece.pos, move, board = new_board):
+								list_pieces.append(piece.pos)
+
+			if list_pieces != []:
+				return checkmate
+			#else:
+				#test king moves to escape check
+				
+		
+	#return False #to discard later
 							
 
 

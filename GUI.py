@@ -377,9 +377,12 @@ class GUI:
 
 		self.cache = cache
 
-	def move(self, src, dst):
-		piece = self.board[src]
-		piece2 = self.board[dst]
+	def move(self, src, dst, board = None ):
+		if board == None:
+			board = self.board
+
+		piece = board[src]
+		piece2 = board[dst]
 
 		print(f'Moving from {src} to {dst}')
 
@@ -387,11 +390,11 @@ class GUI:
 			# Castle
 
 			# TODO - Actually this doesn't work
-			p1 = self.board.coords_to_index(dst)
-			p2 = self.board.coords_to_index(src)
+			p1 = board.coords_to_index(dst)
+			p2 = board.coords_to_index(src)
 
-			self.board[dst] = piece
-			self.board[src] = piece2
+			board[dst] = piece
+			board[src] = piece2
 			piece.pos = p1
 			piece2.pos = p2
 
@@ -401,7 +404,7 @@ class GUI:
 			sprite.move(center)
 			self.update_group.add(sprite)
 		else:
-			self.board[src] = None
+			board[src] = None
 			if piece2 is not None:
 				# TODO - Handle score or whatever
 				piece2.pos = None
@@ -409,9 +412,9 @@ class GUI:
 				sprite = piece2.sprite
 				sprite.kill()
 
-			x, y = self.board.coords_to_index(dst)
+			x, y = board.coords_to_index(dst)
 
-			self.board[dst] = piece
+			board[dst] = piece
 			piece.pos = x, y
 
 		if piece.check_promotion() is True:
