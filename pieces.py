@@ -33,6 +33,10 @@ class Piece(Movement):
 		'''
 		return cell in self.list_moves() # /!\ Just for testing, should be optimized for each piece
 
+	def check_promotion(self):
+		# Just cause it's easier like this
+		return False
+
 	@classmethod
 	def from_name(self, name):
 		names = {
@@ -64,8 +68,15 @@ class Pawn(Piece):
 		if coord[0] in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] and coord[1:] in ['1', '2', '3', '4']:
 			# check which region the pawn is in
 
-			if self.team == 'W':
-				# finds the direction of movement according to the colour of the pawn
+		# for dx in (-1, 1):
+		# 	c = self.board.get(x+dx, ny)
+		# 	if c is not None and c.team != self.team:
+		# 		out.append(self.index_to_coords(x+dx, ny))
+
+		# return out
+
+		
+			if self.team == 'W': # finds the direction of movement according to the colour of the pawn
 				direc = Dir.LEFT
 			if self.team == 'B':
 				direc = Dir.RIGHT
@@ -141,23 +152,28 @@ class Pawn(Piece):
 				# adds diagonal squares in front of him if he can eat pieces
 				if i in adj2.keys() and self.board[adj2[i]] != None and self.board[adj2[i]].team != self.team:
 					out.append(adj2[i])
+		
+		return out # returns the list containing the coordinates of the boxes on which it can move
 
-		return out
-		# returns the list containing the coordinates of the boxes on which it can move
 
-	def promotion(self):
-		"""
-		Promote the Pawn if it reaches the end of the board.
-		"""
+	def check_promotion(self):
 		x, y = self.pos
+		dico = {'W': [7,11], 'B': [0,11], 'R': [0,7]}
 
-		if {'W': [7, 11], 'B': [0, 11], 'R': [0, 7]}[self.team][0] == y or {'W': [7, 11], 'B': [0, 11], 'R': [0, 7]}[self.team][1] == y:
-			# check that the pawn is at the edge of the board
+		return y in dico[self.team]
 
-			new_type = str(input("Q,R,Q,B:  "))  # need modification
+	def promote(self, choice):
+		"""
+        Promote the Pawn if it reaches the end of the board.
+        """
+		if choice not in 'QNRB':
+			raise ValueError('Invalid promotion choice') # If you see this, then someone tried to be smart and failed
 
-			self.board[self.pos] = Piece.from_name(new_type)(self.team, self.coords_to_index(self.pos), self.board)
-			# change its type
+		new_piece = Piece.from_name(choice)(self.team, self.coords_to_index(self.pos), self.board)
+		self.board[self.pos] = new_piece
+		new_piece.sprite = self.sprite
+		new_piece.sprite.piece = new_piece
+		new_piece.sprite.update_image()
 
 
 class Rook(Piece):
@@ -169,13 +185,10 @@ class Rook(Piece):
 
 	def list_moves(self):
 		"""
-		Returns a list of boxes on which the rook can move.
+		returns a list of boxes on which the rook can move
+        """
+		def recur(pos, dir): # Not used anymore
 
-		The rook can move horizontally or vertically in any direction,
-		as long as there are no obstacles in its path.
-		"""
-
-		def recur(pos, dir):
 			"""
 			Recursively find valid moves in a given direction.
 
@@ -193,13 +206,27 @@ class Rook(Piece):
 				if self.board[adj] is None:
 					return [adj] + recur(adj, dir)  # Continue in the same direction
 				elif self.board[adj].team != self.team:
-					return [adj]  # Capture an opponent's piece
-			return []  # No further moves in this direction
+					return [adj] # Capture an opponent's piece
+			return [] # No further moves in this direction
+
+		# out = []
+		# for dir in list(Dir):
+		# 	out += recur(self.pos, dir) # Check all directions
+		# return out
 
 		out = []
-		for dir in list(Dir):
-			out += recur(self.pos, dir)  # Check all directions
-		return out
+		for dir in list(Dir): # Get all possible diagonal moves
+			out += self.get_straight_line(self.pos, dir)
+
+		k = self.index_to_coords(self.pos) # Current position in coordinates
+
+		out2 = []
+		for i in out:
+			if i != k and self.board[i] == None:
+				out2.append(i) # Add empty squares
+			elif i != k and self.board[k].team != self.board[i].team: 
+				out2.append(i) # Add squares occupied by opponent's pieces
+		return out2
 
 class King(Piece):
 	"""
