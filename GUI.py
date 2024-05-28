@@ -108,6 +108,9 @@ class GUI:
 		else:
 			print(f'Bot {self.team_turn} played an illegal move?? -> {a, b}')
 			pass
+			src, dst = bot.get_move()
+			a, b = self.board.index_to_coords(*src), self.board.index_to_coords(*dst)
+			pass
 
 		self.update_board = True
 
@@ -508,5 +511,5 @@ def raytracing(pos, poly):
 	return inside
 
 if __name__ == "__main__":
-	gui = GUI({'W': True, 'R': True, 'B': True, })
+	gui = GUI({'W': True, 'R': False, 'B': False, })
 	gui.start()

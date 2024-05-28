@@ -168,7 +168,7 @@ class Rook(Piece):
 		"""
 		returns a list of boxes on which the rook can move
         """
-		def recur(pos, dir):
+		def recur(pos, dir): # Not used anymore
 
 			"""
 			Recursively find valid moves in a given direction.
@@ -190,10 +190,24 @@ class Rook(Piece):
 					return [adj] # Capture an opponent's piece
 			return [] # No further moves in this direction
 
+		# out = []
+		# for dir in list(Dir):
+		# 	out += recur(self.pos, dir) # Check all directions
+		# return out
+
 		out = []
-		for dir in list(Dir):
-			out += recur(self.pos, dir) # Check all directions
-		return out
+		for dir in list(Dir): # Get all possible diagonal moves
+			out += self.get_straight_line(self.pos, dir)
+
+		k = self.index_to_coords(self.pos) # Current position in coordinates
+
+		out2 = []
+		for i in out:
+			if i != k and self.board[i] == None:
+				out2.append(i) # Add empty squares
+			elif i != k and self.board[k].team != self.board[i].team: 
+				out2.append(i) # Add squares occupied by opponent's pieces
+		return out2
 
 class King(Piece):
 	"""

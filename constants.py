@@ -1,7 +1,5 @@
 import enum
 
-BOARD_SIZE = 8
-
 # PGN notation: K (king), Q (queen), R (rook), B (bishop), N (knight), P (pawn)
 START_ROWS = ('RNBKQBNR', 'PPPPPPPP')
 COLORS = {'W': ('#ffffff', '#000000'), 'B': ('#000000', '#ffffff'), 'R': ('#000000', '#ff0000')} # Not used
