@@ -136,6 +136,14 @@ class GUI:
 		if self.selected is not None:
 			cells.append((self.selected, 'blue'))
 
+		if cells:
+			for cell, color in cells:
+				poly = self.cache[cell]
+				poly = list(map(lambda e: (e+surf.get_rect().center).tuple(), poly))
+				pygame.draw.polygon(surf, color, poly)
+
+		self.screen.blit(surf, dest)
+
 		if self.possibilities:
 			for cell in self.possibilities:
 				cells.append((cell, 'green'))
@@ -169,13 +177,7 @@ class GUI:
 
 		
 		
-		if cells:
-			for cell, color in cells:
-				poly = self.cache[cell]
-				poly = list(map(lambda e: (e+surf.get_rect().center).tuple(), poly))
-				pygame.draw.polygon(surf, color, poly)
-
-		self.screen.blit(surf, dest)
+		
 
 	def load_pieces(self): 
 		self.pieces = {}
