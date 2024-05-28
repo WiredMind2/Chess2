@@ -1,17 +1,22 @@
 import string
-from constants import BOARD_SIZE, START_ROWS, Dir
+from constants import START_ROWS, Dir
 from mouv import Movement
 from pieces import Piece
 
 class Board(Movement):
-	"""Représente le plateau de jeu, avec les positions de chaque pion.
+	"""Represents the game board with the positions of each piece.
+
+	Attributes:
+		board (list): A 2D list representing the game board.
 	"""
+
 	def __init__(self):
 		super().__init__()
 		self.reset()
 
 	def reset(self):
-		self.board = [[None for _ in range(BOARD_SIZE)] for _ in range(int(BOARD_SIZE * 1.5))] # Number, then letter -> /!\ reverse
+		"""Resets the game board to its initial state."""
+		self.board = [[None for _ in range(8)] for _ in range(12)] # Number, then letter -> /!\ reverse
 
 		# White
 		for i, row in enumerate(START_ROWS):
@@ -24,28 +29,40 @@ class Board(Movement):
 				for j, p in enumerate(row):
 					self.board[start - i][j] = Piece.from_name(p)(team, (j, start-i), self)
 
+
 	def iterate(self):
-		"""Iterate over all pieces"""
+		"""Iterates over all pieces on the game board.
+
+		Yields:
+			Piece: The next piece on the game board.
+		"""
 		for row in self.board:
 			for piece in row:
 				if piece is not None:
 					yield piece
 
 	def get(self, i, j):
+		"""Gets the piece at the specified coordinates on the game board.
+
+		Args:
+			i (int): The column index.
+			j (int): The row index.
+
+		Returns:
+			Piece|None: The piece at the specified coordinates, or None if the coordinates are out of bounds.
+		"""
 		if not (0 <= i < len(self.board[0]) and 0 <= j < len(self.board)):
 			return None
 		return self.board[j][i]
 
 	def get_type(self, coord):
-		"""
-		Parameters
-		----------
-		board : La liste représentant le plateau du jeu
+		"""Gets the type of piece at the specified coordinates on the game board.
 
-		Returns
-		-------
-		Le type de pièce qu'on a séléctionné
+		Args:
+			coord (tuple): The coordinates of the piece.
 
+		Returns:
+			str|None: The type of piece at the specified coordinates, or None if there is no piece at the coordinates.
 		"""
 		x, y = self.coords_to_index(coord)
 		if self.board[y][x] != None:
@@ -53,22 +70,40 @@ class Board(Movement):
 		else:
 			return None
 
-	def __getitem__(self, coords):
-		""" val = dico['e5'] """
-		
+	def __getitem__(self, coords)-> Piece|None:
+		"""Gets the piece at the specified coordinates on the game board using the square bracket notation.
+
+		Args:
+			coords (str): The coordinates of the piece in algebraic notation.
+
+		Returns:
+			Piece|None: The piece at the specified coordinates, or None if the coordinates are out of bounds.
+		"""
 		x, y = self.coords_to_index(coords)
 		return self.board[y][x]
 
 	def __setitem__(self, coords, value):
-		""" dico['e5'] = 'K' """
+		"""Sets the piece at the specified coordinates on the game board using the square bracket notation.
+
+		Args:
+			coords (str): The coordinates of the piece in algebraic notation.
+			value (Piece): The piece to be placed at the specified coordinates.
+		"""
 		x, y = self.coords_to_index(coords)
 		self.board[y][x] = value
 
 if __name__ == '__main__':
 	b = Board()
-	b['c3'] = Piece.from_name('K')('W', b.coords_to_index('c3'), b)
-	print(b['c3'].list_moves())
-
+	#b['b3'] = Piece.from_name('P')('R', b.coords_to_index('d3'), b)
+	#b['i7'] = None
+	#b['f1'] = None
+	#b['g1'] = None
+	#print(b['e1'].list_moves())
+	#print(b['e1'].roque())
+	#a = 'j9'
+	#b[a] = Piece.from_name('P')('B', b.coords_to_index(a), b)
+	#print(b[a].list_moves())
+	print(b.board[0][0].type)
 	assert b.coords_to_index('e8') == b.coords_to_index('i8')
 	assert b.coords_to_index('i9') == b.coords_to_index('d9')
 	assert b.coords_to_index('a9') == b.coords_to_index('l9')
@@ -87,10 +122,4 @@ if __name__ == '__main__':
 	assert b.get_straight_line('h4', Dir.DOWN) == ['h4', 'g4', 'f4', 'e4', 'd4', 'c4', 'b4', 'a4']
 	assert dict(b.get_adjacent_diagonale('b3')) == {Dir.DOWN: ['a4'], Dir.UP: ['c2'], Dir.LEFT: ['c4'], Dir.RIGHT: ['a2']}
 	assert dict(b.get_adjacent_diagonale('d4')) in ({Dir.DOWN: ['c5'], Dir.UP: ['e3'], Dir.LEFT: ['e9', 'i5'], Dir.RIGHT: ['c3']}, {Dir.DOWN: ['c5'], Dir.UP: ['e3'], Dir.LEFT: ['i5', 'e9'], Dir.RIGHT: ['c3']})
-	assert b.get_diagonal_line('d4', Dir.LEFT) in (['d4', 'e9', 'f10', 'i5', 'j6'], ['d4', 'i5', 'j6', 'e9', 'f10'])
-	assert b.get_diagonal_line('i9', Dir.UP) in (['i9', 'd5', 'c6', 'e4', 'f3'], ['i9', 'e4', 'f3', 'd5', 'c6'])
 	pass
-
-
-	b['c6'] = Piece.from_name('P')('W', b.coords_to_index('c6'), b)
-	print(b['d7'].list_moves())

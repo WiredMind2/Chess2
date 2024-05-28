@@ -1,4 +1,5 @@
 import functools
+import math
 import multiprocessing
 import os
 import queue
@@ -84,7 +85,7 @@ class Bot:
 				if len(line) == 0:
 					continue
 
-				print('[STOCKFISH stdout]', side, line.decode())
+				# print('[STOCKFISH stdout]', side, line.decode())
 
 				cmd, *args = line.split(b" ", 1)
 				args = args[0] if args else None
@@ -125,7 +126,7 @@ class Bot:
 
 								scores['cached'] = int(args.pop(0)), key2 == b"mate"
 
-							if args[0] in {b"lowerbound", b"upperbound"}:
+							if args and args[0] in {b"lowerbound", b"upperbound"}:
 								args.pop(0)  # ignore
 
 						elif key == b"pv":
@@ -133,10 +134,11 @@ class Bot:
 							if scores.get('cached', None) is not None:
 								scores[best[0]] = scores['cached']
 								scores['cached'] = None
+							args = []
 
-							if iterate:
-								yield best, scores.get(best[0], None)
-							break
+							# if iterate:
+							# 	yield best, scores.get(best[0], None)
+							# break
 
 						else:
 							# Ignore
@@ -147,12 +149,19 @@ class Bot:
 					if len(best) > 1:
 						best = [best[0], best[2]]  # Ponder move
 
-					yield best, scores.get(best[0], None)
+					print('[STOCKFISH stdout]', side, line.decode())
+
+					if best[0] == b'(none)':
+						best = [False]
+
+					yield best, scores.get(best[0], (0, False))
 					break
 
 				else:
 					print(line)
 					pass
+			
+			pass
 
 		if iterate:
 			return iterator()
@@ -181,22 +190,33 @@ class Bot:
 		que = queue.Queue()
 
 		def wrapper(side):
+			ok = False
 			for moves in self.parse_commands(iterate=True, side=side):
 				que.put((side, moves))
+				ok = True
+
+			if ok is False:
+				print('------------------Nothing returned!!', side)
+				pass
 
 			que.put(None)
 			running[side] = False
 
-		for side, board in boards:
+		for side, board, moves in boards:
 			self.engine_ready[side] = False
 			self.write_command("ucinewgame", side)
 			self.write_command("isready", side)
 			self.wait_for_engine(side)
 
-			self.write_command("position " + board, side=side)
+			cmd = "position fen " + board
+			self.write_command(cmd, side=side)
+			print(side, cmd)
 
+			searchmoves = (' searchmoves ' + ' '.join(moves)) if moves else ''
+			cmd = f"go movetime {MAX_SEARCH_TIME*100}{searchmoves}"
+			print(side, cmd)
 			self.write_command(
-				f"go movetime {MAX_SEARCH_TIME*100}", side=side
+				cmd, side=side
 			)  # To ensure that they all start at almost the same time
 
 		running = {}
@@ -204,14 +224,18 @@ class Bot:
 			running[side] = True
 			threading.Thread(target=wrapper, args=(side,)).start()
 
-		best = 0, None
-		while any(running.values()):
+		best = -math.inf, None
+		while any(running.values()) or not que.empty():
 			data = que.get()
 			if data is None:
-				# Thread returned nothing
+				# Thread finished
 				continue
 
 			side, (moves, (score, mate)) = data
+
+			if moves[0] is False:
+				# The engine didn't have enough time to find a move
+				continue
 
 			src, dst = self.move_to_index(moves[0], side) # We only care about the first move
 
@@ -230,42 +254,61 @@ class Bot:
 						best = score, (src, dst)
 			else:
 				# Something went wrong
+				print(f'Illegal move: {cell}->{self.board.index_to_coords(*dst)}')
 				pass
+				# Most likely just picked a piece from the opponent team currently merged with us on that side
+				# SHOULD be safe to ignore, but maybe we should figure out how to recompute a different move?
+				pass
+
+		if best[1] is None:
+			pass
 		return best[1] or (None, None)
 
 	def move_to_index(self, move, side):
 		out = []
-		move = move.decode()
 		for coords in (move[:2], move[2:]):
-			coords = Vec2(self.board.coords_to_index(coords))
-			# Convert back from normal 2 player board to a 3 player (rotated /!\) board
-			if coords.y > 4:
-				if coords.x < 4:
-					# Black
-					coords.x = 7 - coords.x
-				else:
-					# White
-					coords.x = 11 - coords.x
-
-			# Rotate back the coordinates
-			# rotations = "WBR".index(self.rotate_team(self.team)) # num of clockwise rotations
-			rotations = "WBR".index(self.team)
-
-			for i in range(rotations):
-				if coords.y < 4:
-					# White -> Black
-					coords.y = 7 - coords.y
-					# TODO (?) Swap sides?
-				elif coords.y < 8:
-					# Black -> Red
-					coords.y += 4
-				else:
-					# Red -> White
-					coords.y = 11 - coords.y
-
+			coords = self.boardpos_to_index(coords)
 			out.append(coords)
 
 		return out
+
+	def boardpos_to_index(self, coords):
+		if not isinstance(coords, str):
+			coords = coords.decode()
+
+		coords = Vec2(self.board.coords_to_index(coords))
+		# Convert back from normal 2 player board to a 3 player (rotated /!\) board
+		if coords.y > 4:
+			if coords.x < 4:
+				# Black
+				coords.x = 7 - coords.x
+			else:
+				# White
+				coords.x = 11 - coords.x
+    
+		return self.rotate_coords(coords)
+
+	def rotate_coords(self, coords, team=None):
+		# Rotate back the coordinates
+		# rotations = "WBR".index(self.rotate_team(self.team)) # num of clockwise rotations
+		rotations = "WBR".index(team or self.team)
+
+		coords = coords.copy()
+
+		for i in range(rotations):
+			if coords.y < 4:
+				# White -> Black
+				coords.y = 7 - coords.y
+				coords.x = 7 - coords.x
+			elif coords.y < 8:
+				# Black -> Red
+				coords.y += 4
+			else:
+				# Red -> White
+				coords.y = 11 - coords.y
+				coords.x = 7 - coords.x
+
+		return coords
 
 	def board_to_fen(self):
 		board = self.rotate_board()
@@ -336,6 +379,7 @@ class Bot:
 			allies = next(iterator)
 			if allies is not None:
 				allies = self.rotate_team(allies)
+			moves = []
 
 			for i, j in iterator:
 				if isinstance(i, bool):
@@ -353,8 +397,12 @@ class Bot:
 						if spaces > 0:
 							board_repr += str(spaces)
 							spaces = 0
+
 						piece, p_team = cell.type_short, cell.team
 						if p_team == self.team or (allies is not None and p_team == allies):
+							if p_team == self.team and side != self.team:
+								moves.extend(self.get_moves(cell))
+
 							piece = piece.upper()
 						else:
 							piece = piece.lower()  # Just in case
@@ -372,7 +420,7 @@ class Bot:
 			# Halfmove / Fullmove counters
 			board_repr += " 2 1"  # Stupid rule
 
-			out.append((side, board_repr))
+			out.append((side, board_repr, moves))
 
 		# for i in range(3):
 		# 	print(out[i][1])
@@ -395,11 +443,67 @@ class Bot:
 	def rotate_team(self, team):
 		return "WBR"[sum(map(lambda s: "WBR".index(s), (team, self.team))) % 3]
 
+	def get_moves(self, piece):
+		def to_two_player_board(coords):
+			team = dict(zip('WBR', 'WRB'))[self.team]
+   
+			if isinstance(coords, str):
+				coords = self.board.coords_to_index(coords)
+
+			if not isinstance(coords, Vec2):
+				coords = Vec2(*coords)
+
+			rot = self.rotate_coords(coords, team)
+
+			# We can then assume that all moves are always seen as if it was white's turn (even if it's not true)
+
+			if rot.y < 4:
+				# White side
+				return rot
+			elif rot.y < 8:
+				# Black side
+				if rot.x < 4:
+					# Left
+					return rot
+				else:
+					# Right
+					return False
+			elif rot.y < 12:
+				# Red side
+				if rot.x < 4:
+					# Left
+					return False
+				else:
+					# Right
+					rot.y -= 4
+					return rot
+			else:
+				return False
+
+		src = to_two_player_board(self.board.index_to_coords(*piece.pos))
+		if src is False:
+			return []
+		src = self.board.index_to_coords(src.tuple(), two_players=True)
+
+		moves = []
+
+		for dst in piece.list_moves():
+			dst = to_two_player_board(dst)
+			if dst is not False:
+				dst = self.board.index_to_coords(dst.tuple(), two_players=True)
+				moves.append(src + dst)
+
+		return moves
+
 if __name__ == "__main__":
 	from board import Board
 
 	board = Board()
-	bot = Bot(board, "B")
 
-	move = bot.get_move()
+	# move = bot.get_move()
+ 
+	for team in 'WBR':
+		bot = Bot(board, team)
+		src, dst = list(map(lambda e: bot.board.index_to_coords(*e), bot.move_to_index('d2d4', team)))
+		print(team, src, dst)
 	pass

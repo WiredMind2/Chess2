@@ -22,7 +22,15 @@ class Movement:
 		return x, y # x= lettre, y = chiffre
 
 	@classmethod
-	def index_to_coords(cls, x, y):
+	def index_to_coords(cls, x, y=None, two_players=False):
+		if y is None:
+			if isinstance(x, Vec2):
+				x, y = x.tuple()
+			elif isinstance(x, tuple):
+				x, y = x
+			else:
+				raise ValueError('y must be specified')
+
 		if y <= 3:
 			# White zone
 			pass  # Don't change anything
@@ -33,7 +41,8 @@ class Movement:
 				pass  # Don't change anything
 			else:
 				# Red side
-				x = x + 4  # efgh => ijkl
+				if not two_players:
+					x = x + 4  # efgh => ijkl
 		else:
 			# Red zone
 			if x <= 3:
@@ -45,7 +54,7 @@ class Movement:
 	
 		return ''.join((string.ascii_lowercase[x], str(y+1)))
 
-	def get_straight_line(self, coords, direction, skipped_first=False):
+	def get_straight_line(self, coords, direction, skipped_first=False, origin=None):
 		# Renvoie une liste de coordonnées dans une direction donnée
 		# S'arrête lorsque l'on atteint un mur ou une autre pièce, en ignorant la première case
 
@@ -55,16 +64,36 @@ class Movement:
 			return []
 
 		# Check cell
-		x, y = self.coords_to_index(coords)
-		if not skipped_first and self.board[y][x] is not None:
+		if isinstance(self.board, list):
+			b = self
+		else:
+			b = self.board
+
+		if not skipped_first and b[coords] is not None:
 			return []
 
-		next_cell = next(
-			filter(
-				lambda e: e[0] == direction, 
-				self.get_adjacent(coords)), 
-			[None, None]
-		)[1]  # equivalent à dict(self.get_adjacent(x, y))[direction] mais un peu plus rapide
+		# next_cell = next(
+		# 	filter(
+		# 		lambda e: e[0] == direction, 
+		# 		self.get_adjacent(coords)), 
+		# 	[None, None]
+		# )[1]  # equivalent à dict(self.get_adjacent(x, y))[direction] mais un peu plus rapide
+
+		# SAUF que ca gère pas le cas où la direction change en passant le milieu donc pas génial
+
+		
+		adj = dict(self.get_adjacent(coords))
+		if origin is not None:
+			for dir, cells in adj.items():
+				if origin in cells:
+					break
+			else:
+				# wtf?
+				raise Exception
+
+			next_cell = adj.get(REVERSE[dir], None)
+		else:
+			next_cell = adj.get(direction, None)
 
 		if next_cell is None:
 			return [coords]
@@ -297,9 +326,28 @@ class Movement:
 
 		return False
 
-	def is_check(self, src, dest):
-		# TODO - Check all kind of possible movements (queen + knight?) around each king in case there is a check
-		return False
+	def is_check(self, board, team,  src = None, dest = None ):
+		
+		is_check = False
+		if src == None and dest == None:
+			
+			list_kings = []
+			#find all the kings
+			for row in board:
+				for piece in row:
+					if piece != None:
+						if piece.type == 'K' and piece.team == team:
+							list_kings.append(piece)
+
+			for king in list_kings:
+				for row in board: 
+					for piece in row:
+						if piece != None and piece.type != 'K' and piece.team != king.team:
+							is_check = True
+							return 		
+		else:
+			if dest in board[src].list_moves():
+				is_check = True				
 
 
 class Vec2:
@@ -337,3 +385,6 @@ class Vec2:
 
 	def tuple(self):
 		return self.x, self.y
+
+	def copy(self):
+		return Vec2(self.x, self.y)
