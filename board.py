@@ -103,7 +103,7 @@ if __name__ == '__main__':
 	#a = 'j9'
 	#b[a] = Piece.from_name('P')('B', b.coords_to_index(a), b)
 	#print(b[a].list_moves())
-
+	print(b.board[0][0].type)
 	assert b.coords_to_index('e8') == b.coords_to_index('i8')
 	assert b.coords_to_index('i9') == b.coords_to_index('d9')
 	assert b.coords_to_index('a9') == b.coords_to_index('l9')

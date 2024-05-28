@@ -404,7 +404,7 @@ class GUI:
 		if piece is None:
 			return False
 
-		if self.board.is_check(src, dst):
+		if self.board.is_check(self.board, self.board[src].team,  src, dst):
 			return False
 
 		moves = piece.list_moves()

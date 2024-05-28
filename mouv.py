@@ -327,8 +327,7 @@ class Movement:
 		return False
 
 	def is_check(self, board, team,  src = None, dest = None ):
-		return False
-	"""
+		
 		is_check = False
 		if src == None and dest == None:
 			
@@ -336,8 +335,9 @@ class Movement:
 			#find all the kings
 			for row in board:
 				for piece in row:
-					if piece != None and piece.type == 'K' and piece.team == team:
-						list_kings.append(piece)
+					if piece != None:
+						if piece.type == 'K' and piece.team == team:
+							list_kings.append(piece)
 
 			for king in list_kings:
 				for row in board: 
@@ -346,9 +346,8 @@ class Movement:
 							is_check = True
 							return 		
 		else:
-			if dest in src.list_moves():
-				return True 				
-	"""
+			if dest in board[src].list_moves():
+				is_check = True				
 
 
 class Vec2:
