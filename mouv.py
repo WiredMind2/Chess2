@@ -347,7 +347,9 @@ class Movement:
 							return 		
 		else:
 			if dest in board[src].list_moves():
-				is_check = True				
+				is_check = True	
+
+	#def is_checkmate			
 
 
 class Vec2:
