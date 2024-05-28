@@ -101,16 +101,16 @@ class GUI:
 
 		if self.validate_move(a, b):
 			self.move(a, b)
-
-			teams = list(COLORS)
-			i = teams.index(self.team_turn)
-			self.team_turn = teams[(i+1)%3]
 		else:
 			print(f'Bot {self.team_turn} played an illegal move?? -> {a, b}')
 			pass
-			src, dst = bot.get_move()
-			a, b = self.board.index_to_coords(*src), self.board.index_to_coords(*dst)
-			pass
+			# src, dst = bot.get_move()
+			# a, b = self.board.index_to_coords(*src), self.board.index_to_coords(*dst)
+			# pass
+
+		teams = list(COLORS)
+		i = teams.index(self.team_turn)
+		self.team_turn = teams[(i+1)%3]
 
 		self.update_board = True
 
