@@ -120,7 +120,7 @@ class GUI:
 			self.screen.fill("purple")
 			self.render_board()
 
-			# self.piece_sprites.update()
+			self.piece_sprites.update()
 			rects = self.piece_sprites.draw(self.screen)
 			self.update_group.empty()
 
