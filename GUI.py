@@ -120,7 +120,7 @@ class GUI:
 			self.screen.fill("purple")
 			self.render_board()
 
-			# self.piece_sprites.update()
+			self.piece_sprites.update()
 			rects = self.piece_sprites.draw(self.screen)
 			self.update_group.empty()
 
@@ -131,6 +131,20 @@ class GUI:
 		dest.center = self.screen.get_rect().center
 
 		surf = self.board_surf.copy()
+
+		cells = []
+		if self.selected is not None:
+			cells.append((self.selected, 'blue'))
+		
+		if cells:
+			for cell, color in cells:
+				poly = self.cache[cell]
+				poly = list(map(lambda e: (e+surf.get_rect().center).tuple(), poly))
+				pygame.draw.polygon(surf, color, poly)
+
+		if self.possibilities:
+			for cell in self.possibilities:
+				cells.append((cell, 'green'))
   
 		for pos, corners in self.cache.items():
 			poly = list(map(lambda e: (e + surf.get_rect().center).tuple(), corners))
