@@ -68,8 +68,6 @@ class Pawn(Piece):
 		if coord[0] in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] and coord[1:] in ['1', '2', '3', '4']:
 			# check which region the pawn is in
 
-		if coord[0] in ['a','b','c','d','e','f','g','h' ] and coord[1:] in ['1','2','3','4']: # check which region the pawn is in
-
 		# for dx in (-1, 1):
 		# 	c = self.board.get(x+dx, ny)
 		# 	if c is not None and c.team != self.team:
