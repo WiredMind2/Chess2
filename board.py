@@ -70,7 +70,7 @@ class Board(Movement):
 		else:
 			return None
 
-	def __getitem__(self, coords)-> Piece|None:
+	def __getitem__(self, coords) : 
 		"""Gets the piece at the specified coordinates on the game board using the square bracket notation.
 
 		Args:
@@ -100,10 +100,10 @@ if __name__ == '__main__':
 	#b['g1'] = None
 	#print(b['e1'].list_moves())
 	#print(b['e1'].roque())
-	a = 'j9'
-	b[a] = Piece.from_name('P')('B', b.coords_to_index(a), b)
-	print(b[a].list_moves())
-
+	#a = 'j9'
+	#b[a] = Piece.from_name('P')('B', b.coords_to_index(a), b)
+	#print(b[a].list_moves())
+	print(b.board[0][0].type)
 	assert b.coords_to_index('e8') == b.coords_to_index('i8')
 	assert b.coords_to_index('i9') == b.coords_to_index('d9')
 	assert b.coords_to_index('a9') == b.coords_to_index('l9')

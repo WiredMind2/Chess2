@@ -19,6 +19,7 @@ Dans notre jeu d'échecs à trois joueurs, vous pouvez choisir de jouer l'un des
 
 ### Comment jouer ?
 
+1. **Choix des joueurs**: Sur le menu de départ, choisissez la couleur que vous souhaitez incarner et indiquez si vous préférez affronter d'autres joueurs ou une IA.
 1. **Sélection d'une pièce** : Cliquez sur la pièce que vous souhaitez déplacer.
 2. **Déplacement** : Cliquez ensuite sur la case où vous souhaitez déplacer la pièce. Assurez-vous que la case choisie est atteignable par la pièce sélectionnée conformément aux règles de déplacement des échecs.
 
