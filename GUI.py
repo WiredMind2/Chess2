@@ -101,16 +101,16 @@ class GUI:
 
 		if self.validate_move(a, b):
 			self.move(a, b)
-
-			teams = list(COLORS)
-			i = teams.index(self.team_turn)
-			self.team_turn = teams[(i+1)%3]
 		else:
 			print(f'Bot {self.team_turn} played an illegal move?? -> {a, b}')
 			pass
-			src, dst = bot.get_move()
-			a, b = self.board.index_to_coords(*src), self.board.index_to_coords(*dst)
-			pass
+			# src, dst = bot.get_move()
+			# a, b = self.board.index_to_coords(*src), self.board.index_to_coords(*dst)
+			# pass
+
+		teams = list(COLORS)
+		i = teams.index(self.team_turn)
+		self.team_turn = teams[(i+1)%3]
 
 		self.update_board = True
 
@@ -120,7 +120,7 @@ class GUI:
 			self.screen.fill("purple")
 			self.render_board()
 
-			self.piece_sprites.update()
+			#self.piece_sprites.update()
 			rects = self.piece_sprites.draw(self.screen)
 			self.update_group.empty()
 
@@ -135,12 +135,14 @@ class GUI:
 		cells = []
 		if self.selected is not None:
 			cells.append((self.selected, 'blue'))
-		
+
 		if cells:
 			for cell, color in cells:
 				poly = self.cache[cell]
 				poly = list(map(lambda e: (e+surf.get_rect().center).tuple(), poly))
 				pygame.draw.polygon(surf, color, poly)
+
+		self.screen.blit(surf, dest)
 
 		if self.possibilities:
 			for cell in self.possibilities:
@@ -173,7 +175,9 @@ class GUI:
 
 			pygame.draw.polygon(surf, color, poly)
 
-		self.screen.blit(surf, dest)
+		
+		
+		
 
 	def load_pieces(self): 
 		self.pieces = {}
@@ -181,7 +185,7 @@ class GUI:
 			dest = self.coords_to_pos(piece.pos) + self.screen.get_rect().center # Centers the image
 			sprite = PieceSprite(piece, dest.tuple(), self.scale, self.piece_sprites, self.update_group)
 			# No need to save it since it's already in the sprite group
-			# self.pieces[piece] = sprite
+			self.pieces[piece] = sprite
 
 	def load_board(self):
 		surf = pygame.image.load(os.path.join('assets', 'board.png'))
@@ -541,5 +545,5 @@ def raytracing(pos, poly):
 	return inside
 
 if __name__ == "__main__":
-	gui = GUI({'W': True, 'R': True, 'B': False, })
+	gui = GUI({'W': True, 'R': True, 'B': True, })
 	gui.start()

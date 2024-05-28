@@ -149,7 +149,7 @@ class Bot:
 					if len(best) > 1:
 						best = [best[0], best[2]]  # Ponder move
 
-					print('[STOCKFISH stdout]', side, line.decode())
+					# print('[STOCKFISH stdout]', side, line.decode())
 
 					if best[0] == b'(none)':
 						best = [False]
@@ -210,11 +210,11 @@ class Bot:
 
 			cmd = "position fen " + board
 			self.write_command(cmd, side=side)
-			print(side, cmd)
+			# print(side, cmd)
 
 			searchmoves = (' searchmoves ' + ' '.join(moves)) if moves else ''
 			cmd = f"go movetime {MAX_SEARCH_TIME*100}{searchmoves}"
-			print(side, cmd)
+			# print(side, cmd)
 			self.write_command(
 				cmd, side=side
 			)  # To ensure that they all start at almost the same time
@@ -258,7 +258,6 @@ class Bot:
 				pass
 				# Most likely just picked a piece from the opponent team currently merged with us on that side
 				# SHOULD be safe to ignore, but maybe we should figure out how to recompute a different move?
-				pass
 
 		if best[1] is None:
 			pass
@@ -278,14 +277,10 @@ class Bot:
 
 		coords = Vec2(self.board.coords_to_index(coords))
 		# Convert back from normal 2 player board to a 3 player (rotated /!\) board
-		if coords.y > 4:
-			if coords.x < 4:
-				# Black
-				coords.x = 7 - coords.x
-			else:
-				# White
-				coords.x = 11 - coords.x
-    
+		if coords.y > 4 and coords.x >= 4:
+			# Just have to move the right side
+			coords.x += 4
+
 		return self.rotate_coords(coords)
 
 	def rotate_coords(self, coords, team=None):
@@ -293,22 +288,22 @@ class Bot:
 		# rotations = "WBR".index(self.rotate_team(self.team)) # num of clockwise rotations
 		rotations = "WBR".index(team or self.team)
 
-		coords = coords.copy()
+		c = coords.copy()
 
 		for i in range(rotations):
-			if coords.y < 4:
+			if c.y < 4:
 				# White -> Black
-				coords.y = 7 - coords.y
-				coords.x = 7 - coords.x
-			elif coords.y < 8:
+				c.y = 7 - c.y
+				c.x = 7 - c.x
+			elif c.y < 8:
 				# Black -> Red
-				coords.y += 4
+				c.y += 4
 			else:
 				# Red -> White
-				coords.y = 11 - coords.y
-				coords.x = 7 - coords.x
+				c.y = 11 - c.y
+				# c.x = 7 - c.x
 
-		return coords
+		return c
 
 	def board_to_fen(self):
 		board = self.rotate_board()
@@ -502,8 +497,13 @@ if __name__ == "__main__":
 
 	# move = bot.get_move()
  
-	for team in 'WBR':
-		bot = Bot(board, team)
-		src, dst = list(map(lambda e: bot.board.index_to_coords(*e), bot.move_to_index('d2d4', team)))
-		print(team, src, dst)
+	# for team in 'WBR':
+	# 	bot = Bot(board, team)
+		# src, dst = list(map(lambda e: bot.board.index_to_coords(*e), bot.move_to_index('d2d4', team)))
+		# print(team, src, dst)
+  
+	bot = Bot(board, 'B')
+	print(board.index_to_coords(bot.rotate_coords(Vec2(7, 4))))
+
+	print(board.index_to_coords(bot.boardpos_to_index('h5')))
 	pass
