@@ -132,19 +132,32 @@ class GUI:
 
 		surf = self.board_surf.copy()
   
-		cells = []
-		if self.selected is not None:
-			cells.append((self.selected, 'blue'))
+		for pos, corners in self.cache.items():
+			poly = list(map(lambda e: (e + surf.get_rect().center).tuple(), corners))
+			x, y = self.board.coords_to_index(pos)
+			
+			if x in (0, 2, 4, 6):
+				color = 'black' if (y % 2 == 0) else 'white'
+				# Conditions pour b, d, f, h
+			elif x in (1, 3, 5, 7):
+				color = 'white' if (y % 2 == 0) else 'black'
+        		# Exceptions for l, j "8,6,9,11" (Noir)
+			elif x in (8, 6, 9, 11) and y in (8, 6, 9, 11):
+				color = 'white'
+ 				# Exceptions for i, k "8,6,9,11" (Blanc)
+			elif x in (8, 6, 9, 11) and y in (7, 5, 10, 12):
+				color = 'black'
+				# Exceptions for l, j "7,5,10,12" (Blanc)
+			elif x in (7, 5, 10, 12) and y in (8, 6, 9, 11):
+				color = 'black'
+				# Exceptions for i, k "7,5,10,12" (Noir)
+			elif x in (7, 5, 10, 12) and y in (7, 5, 10, 12):
+				color = 'white'
+				# Default color
+			else:
+				color = 'black' if (x+y) % 2 == 0 else 'white'
 
-		if self.possibilities:
-			for cell in self.possibilities:
-				cells.append((cell, 'green'))
-
-		if cells:
-			for cell, color in cells:
-				poly = self.cache[cell]
-				poly = list(map(lambda e: (e+surf.get_rect().center).tuple(), poly))
-				pygame.draw.polygon(surf, color, poly)
+			pygame.draw.polygon(surf, color, poly)
 
 		self.screen.blit(surf, dest)
 
