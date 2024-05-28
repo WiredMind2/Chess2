@@ -135,12 +135,6 @@ class GUI:
 		cells = []
 		if self.selected is not None:
 			cells.append((self.selected, 'blue'))
-		
-		if cells:
-			for cell, color in cells:
-				poly = self.cache[cell]
-				poly = list(map(lambda e: (e+surf.get_rect().center).tuple(), poly))
-				pygame.draw.polygon(surf, color, poly)
 
 		if self.possibilities:
 			for cell in self.possibilities:
@@ -172,6 +166,14 @@ class GUI:
 				color = 'black' if (x+y) % 2 == 0 else 'white'
 
 			pygame.draw.polygon(surf, color, poly)
+
+		
+		
+		if cells:
+			for cell, color in cells:
+				poly = self.cache[cell]
+				poly = list(map(lambda e: (e+surf.get_rect().center).tuple(), poly))
+				pygame.draw.polygon(surf, color, poly)
 
 		self.screen.blit(surf, dest)
 
@@ -538,5 +540,5 @@ def raytracing(pos, poly):
 	return inside
 
 if __name__ == "__main__":
-	gui = GUI({'W': True, 'R': True, 'B': False, })
+	gui = GUI({'W': True, 'R': True, 'B': True, })
 	gui.start()

@@ -70,7 +70,7 @@ class Board(Movement):
 		else:
 			return None
 
-	def __getitem__(self, coords)-> Piece|None:
+	def __getitem__(self, coords) : 
 		"""Gets the piece at the specified coordinates on the game board using the square bracket notation.
 
 		Args:
