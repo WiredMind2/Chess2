@@ -342,14 +342,48 @@ class Movement:
 			for king in list_kings:
 				for row in board: 
 					for piece in row:
-						if piece != None and piece.type != 'K' and piece.team != king.team:
+						if piece != None and piece.type != 'K' and piece.team != king.team and king in piece.list_moves():
 							is_check = True
-							return 		
 		else:
 			if dest in board[src].list_moves():
 				is_check = True	
+		return is_check
 
-	#def is_checkmate			
+	def is_checkmate(self):
+		list_kings = []
+
+		#find all the kings
+		for row in self.board:
+			for piece in row:
+				if piece != None:
+					if piece.type == 'K':
+						list_kings.append(piece.pos)
+
+		
+
+		#wich pieces are making check
+		for king in list_kings:
+			made_check = []
+
+			for row in self.board: 
+				for piece in row:
+					if piece != None and piece.type != 'K' and piece.team != king.team and king in piece.list_moves():
+						made_check.append(piece.pos)
+		
+			#find all the pieces that can move to block the check
+			list_pieces = []
+			for row in self.board:
+				for piece in row:
+					if piece != None and piece.team == king.team:
+						for move in piece.list_moves():
+							new_board = self.board.copy()
+		return False
+							
+
+
+					
+							
+
 
 
 class Vec2:
