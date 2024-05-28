@@ -1,3 +1,54 @@
+**Difficulté principale du projet: L'appropriation de la technologie du raytracing**
+
+Un des défis rencontrés lors de l'élaboration du jeu est la reconnaissance des différentes cases lorsqu'un joueur indique la position du pion joué. Ce problème serait simple à résoudre si les cases étaient carrées, comme sur un plateau d'échecs classique, mais nous avons ici une multitude de polygones irréguliers. Pour que le code reconnaisse dans quelle case le joueur clique, nous avons utilisé la technologie du ray tracing, traditionnellement utilisée pour générer des images en simulant la propagation de la lumière dans un environnement virtuel. 
+
+Le processus commence par le lancement de rayons depuis une caméra virtuelle à travers chaque pixel de l'image. Ces rayons interagissent avec les objets de la scène. Dans notre cas, le rayon part de la position où le joueur a cliqué et se dirige arbitrairement selon le vecteur y = 0. Le rayon est capable de reconnaître un polygone car chaque paire de sommets d'un polygone a été préalablement enregistrée. Ainsi, le rayon peut détecter lorsqu'il traverse un polygone.
+
+Le théorème important que nous utilisons est le suivant, lorsque le rayon part depuis la position où le joueur a cliqué,
+- Si le rayon traverse un nombre pair de fois un polygone, c'est que la caméra virtuelle est à l'extérieur, le clic n'est pas dans cette case
+- Si le rayon traverse un nombre impair de fois un polygone, c'est que la caméra virtuelle est dans ce polygone et que par conséquent, le clic est inclut dans cette case. La case connue, le reste du code propose les options de déplacement possible et la faisabilité du coup.
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Algorithmes non triviaux utilisés:
 
 Implémentation d'un robot pouvant jouer aux echecs:
@@ -18,6 +69,42 @@ Raytracing:
 Un algorithme qui est devenu très populaire depuis la sortie des cartes graphiques RTX, il permet de compter le nombre d'intersections entre un rayon imaginaire et des ensembles de polygones. 
 Nous utilisons cette algorithme pour autre chose par contre:
 Lors d'un clic de la souris, on lance un laser depuis les coordonnees du clic qui se deplace vers la gauche jusqu'a l'infini. On compte combien de fois il traverse chaque arete de chaque case. Il existe un theoreme (nom a retrouver) qui dit que si le laser traverse un nombre pair de fois les aretes d'une forme fermee, alors l'origine du laser se trouve a l'exterieur de la forme. Sinon si c'est impair, alors l'origine est a l'interieur et donc on a clique a l'interieur de la case correspondante.
+
+
+
+
+
+
+
+---
+
+J'ai clarifié et simplifié certaines phrases pour une meilleure compréhension tout en conservant les détails techniques.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+point de départ y=0
+deux sommets
+
 
 expliquer comment tu transposes cette technologie à notre problème.
 pourquoi ? but final est de déterminer où est ce que je clic pour ainsi sélectionner une case. Ca aurait été trivial si tout était carré mais là, formes irrégulières
