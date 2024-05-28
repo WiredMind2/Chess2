@@ -53,7 +53,7 @@ class Board(Movement):
 		else:
 			return None
 
-	def __getitem__(self, coords)-> Piece|None:
+	def __getitem__(self, coords):
 		""" val = dico['e5'] """
 		
 		x, y = self.coords_to_index(coords)
