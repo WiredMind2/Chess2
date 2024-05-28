@@ -1,4 +1,4 @@
-**Difficulté principale du projet: L'appropriation de la technnologie du raytracing**
+**Difficulté principale du projet: L'appropriation de la technologie du raytracing**
 
 Un des défis rencontrés lors de l'élaboration du jeu est la reconnaissance des différentes cases lorsqu'un joueur indique la position du pion joué. Ce problème serait simple à résoudre si les cases étaient carrées, comme sur un plateau d'échecs classique, mais nous avons ici une multitude de polygones irréguliers. Pour que le code reconnaisse dans quelle case le joueur clique, nous avons utilisé la technologie du ray tracing, traditionnellement utilisée pour générer des images en simulant la propagation de la lumière dans un environnement virtuel. 
 
