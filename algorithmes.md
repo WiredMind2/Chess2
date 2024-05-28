@@ -8,6 +8,11 @@ Le théorème important que nous utilisons est le suivant, lorsque le rayon part
 - Si le rayon traverse un nombre pair de fois un polygone, c'est que la caméra virtuelle est à l'extérieur, le clic n'est pas dans cette case
 - Si le rayon traverse un nombre impair de fois un polygone, c'est que la caméra virtuelle est dans ce polygone et que par conséquent, le clic est inclut dans cette case. La case connue, le reste du code propose les options de déplacement possible et la faisabilité du coup.
 
+Un autre challenge a été le mapping de la carte.
+Il faut savoir qu'afin que l'IA puisse définir le meilleur coup à jouer, nous avons dû adapter le plateau en le divisant en trois plateaux de deux jouers. L'IA issue de Stockfish (moteur d'échec open-source le plus puissant au monde) doit obligatoirement lire le plateau en FEN strings pour pouvoir fonctionner. Notre travail a donc été de d'abord diviser le plateau de trois joueurs en trois plateaux de deux joueurs puis de transposer ces tableaux en FEN String.
+
+
+
 ---
 
 
