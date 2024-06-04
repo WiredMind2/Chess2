@@ -25,7 +25,7 @@ class Bot:
 				".\stockfish\stockfish-windows-x86-64-sse41-popcnt\stockfish\stockfish-windows-x86-64-sse41-popcnt.exe"
 			]
 		elif platform == "darwin":
-			raise OSError("Désolé, MacOS n'est encore pas supporté.")
+			raise OSError("Désolé, MacOS n'est encore pas supporté pour ce robot.")
 
 		cmd[0] = os.path.abspath(cmd[0])
 
@@ -66,7 +66,11 @@ class Bot:
 		return wrapped
 
 	def start_bot(self, side):
-		self.read_command(side)  # Stockfish 16.1 by whatever
+		init = self.read_command(side)  # Stockfish 16.1 by whatever
+		if b'GLIB' in init:
+			# There is some stuff missing
+			raise FileNotFoundError('GLIBCXX is missing!')
+
 		self.write_command("uci", side=side)
 
 		# self.write_command('setoption name UCI_Elo value 3190') # Make a monster?

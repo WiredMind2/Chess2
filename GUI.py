@@ -200,9 +200,15 @@ class GUI:
 	def init_bots(self):
 		for team, playable in self.playable_teams.items():
 			if not playable:
-				bot = Bot(self.board, team)
-				self.bots[team] = bot
-				print(f'Initialized bot for {team} team')
+				try:
+					bot = Bot(self.board, team)
+				except FileNotFoundError:
+					# Bots couldn't find some files cuz INSA computers sucks
+					print("WARNING: GLIBCXX is missing, the bot cannot start. Please install the required libraries ASAP!")
+					self.playable_teams[team] = True
+				else:
+					self.bots[team] = bot
+					print(f'Initialized bot for {team} team')
 
 	@cache
 	def coords_to_pos(self, coords):

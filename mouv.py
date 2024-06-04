@@ -378,11 +378,7 @@ class Movement:
 						for move in piece.list_moves():
 							new_board = self.board.copy()
 		return False
-							
 
-
-					
-							
 
 
 
