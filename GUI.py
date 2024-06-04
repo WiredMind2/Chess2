@@ -175,9 +175,13 @@ class GUI:
 
 			pygame.draw.polygon(surf, color, poly)
 
-		
-		
-		
+		if cells:
+			for cell, color in cells:
+				poly = self.cache[cell]
+				poly = list(map(lambda e: (e+surf.get_rect().center).tuple(), poly))
+				pygame.draw.polygon(surf, color, poly)
+
+		self.screen.blit(surf, dest)
 
 	def load_pieces(self): 
 		self.pieces = {}
@@ -188,16 +192,18 @@ class GUI:
 			self.pieces[piece] = sprite
 
 	def load_board(self):
-		surf = pygame.image.load(os.path.join('assets', 'board.png'))
+		# surf = pygame.image.load(os.path.join('assets', 'board.png'))
 		s_rect = self.screen.get_rect()
 
-		dest = surf.get_rect().fit(s_rect)
+		surf_rect = pygame.Rect(0, 0, 916, 792)
+		# dest = surf.get_rect().fit(s_rect)
+		dest = surf_rect.fit(s_rect)
 	
-		self.scale = dest.width / surf.get_rect().width
+		self.scale = dest.width / surf_rect.width
 
-		# self.board_surf = py, game.transform.smoothscale(surf, dest.size)
+		# self.board_surf = pygame.transform.smoothscale(surf, dest.size)
 		self.board_surf = pygame.Surface(dest.size)
-		self.board_surf.fill((255, 255, 255))
+		self.board_surf.fill("purple")
 
 	def init_bots(self):
 		for team, playable in self.playable_teams.items():
@@ -547,5 +553,5 @@ def raytracing(pos, poly):
 	return inside
 
 if __name__ == "__main__":
-	gui = GUI({'W': True, 'R': True, 'B': True })
+	gui = GUI({'W': True, 'R': False, 'B': False, })
 	gui.start()
