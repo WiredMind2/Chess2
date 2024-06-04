@@ -117,7 +117,6 @@ class GUI:
 	def render(self):
 		if self.update_board:
 			self.update_board = False
-			self.screen.fill("purple")
 			self.render_board()
 
 			#self.piece_sprites.update()
@@ -131,6 +130,12 @@ class GUI:
 		dest.center = self.screen.get_rect().center
 
 		surf = self.board_surf.copy()
+
+		screen_size = self.screen.get_rect().size
+		if self.bg.get_rect().size != screen_size:
+			pygame.transform.scale(self.bg_full, screen_size, self.bg)
+
+		self.screen.blit(self.bg, (0, 0))
 
 		cells = []
 		if self.selected is not None:
@@ -192,8 +197,13 @@ class GUI:
 			self.pieces[piece] = sprite
 
 	def load_board(self):
-		# surf = pygame.image.load(os.path.join('assets', 'board.png'))
 		s_rect = self.screen.get_rect()
+
+
+		# surf = pygame.image.load(os.path.join('assets', 'board.png'))
+		self.bg_full = pygame.image.load(os.path.join('assets', 'background.png'))
+
+		self.bg = pygame.transform.scale(self.bg_full, s_rect.size)
 
 		surf_rect = pygame.Rect(0, 0, 916, 792)
 		# dest = surf.get_rect().fit(s_rect)
@@ -202,8 +212,8 @@ class GUI:
 		self.scale = dest.width / surf_rect.width
 
 		# self.board_surf = pygame.transform.smoothscale(surf, dest.size)
-		self.board_surf = pygame.Surface(dest.size)
-		self.board_surf.fill("purple")
+		self.board_surf = pygame.Surface(dest.size, pygame.SRCALPHA, 32).convert_alpha()
+		# self.board_surf.fill("purple")
 
 	def init_bots(self):
 		for team, playable in self.playable_teams.items():
