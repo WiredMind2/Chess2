@@ -71,7 +71,7 @@ class GUI:
 
 		if button == 1: # Left click
 			piece = self.board[cell]
-			print('Clicked on:', cell, piece)
+			# print('Clicked on:', cell, piece)
 
 			if self.playable_teams[self.team_turn] is True:
 				if piece is not None and piece.team == self.team_turn:
@@ -540,5 +540,5 @@ def raytracing(pos, poly):
 	return inside
 
 if __name__ == "__main__":
-	gui = GUI({'W': True, 'R': True, 'B': True, })
+	gui = GUI({'W': True, 'R': False, 'B': False, })
 	gui.start()
