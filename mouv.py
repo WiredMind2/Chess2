@@ -331,7 +331,6 @@ class Movement:
 		#check if a team is in check
 		is_check = False
 		if src == None and dest == None:
-			
 			list_kings = []
 			#find all the kings
 			for row in board:
@@ -346,13 +345,15 @@ class Movement:
 						if piece != None and piece.type != 'K' and piece.team != king.team and king in piece.list_moves():
 							is_check = True
 		else:
+			
 			list_kings = []
 			#find all the kings
 			for row in board:
 				for piece in row:
-					if piece != None and piece.team != team:
+					if piece != None:
 						if piece.type == 'K' and piece.team == team:
 							list_kings.append(piece.pos)
+
 			if dest in list_kings:
 				is_check = True	
 		return is_check
