@@ -193,7 +193,9 @@ class GUI:
 	
 		self.scale = dest.width / surf.get_rect().width
 
-		self.board_surf = pygame.transform.smoothscale(surf, dest.size)
+		# self.board_surf = py, game.transform.smoothscale(surf, dest.size)
+		self.board_surf = pygame.Surface(dest.size)
+		self.board_surf.fill((255, 255, 255))
 
 	def init_bots(self):
 		for team, playable in self.playable_teams.items():
