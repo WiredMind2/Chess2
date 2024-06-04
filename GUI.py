@@ -120,7 +120,7 @@ class GUI:
 			self.screen.fill("purple")
 			self.render_board()
 
-			self.piece_sprites.update()
+			#self.piece_sprites.update()
 			rects = self.piece_sprites.draw(self.screen)
 			self.update_group.empty()
 
@@ -136,6 +136,14 @@ class GUI:
 		if self.selected is not None:
 			cells.append((self.selected, 'blue'))
 
+		if cells:
+			for cell, color in cells:
+				poly = self.cache[cell]
+				poly = list(map(lambda e: (e+surf.get_rect().center).tuple(), poly))
+				pygame.draw.polygon(surf, color, poly)
+
+		self.screen.blit(surf, dest)
+
 		if self.possibilities:
 			for cell in self.possibilities:
 				cells.append((cell, 'green'))
@@ -145,25 +153,25 @@ class GUI:
 			x, y = self.board.coords_to_index(pos)
 			
 			if x in (0, 2, 4, 6):
-				color = 'black' if (y % 2 == 0) else 'white'
+				color = 'grey' if (y % 2 == 0) else 'white'
 				# Conditions pour b, d, f, h
 			elif x in (1, 3, 5, 7):
-				color = 'white' if (y % 2 == 0) else 'black'
+				color = 'white' if (y % 2 == 0) else 'grey'
         		# Exceptions for l, j "8,6,9,11" (Noir)
 			elif x in (8, 6, 9, 11) and y in (8, 6, 9, 11):
 				color = 'white'
  				# Exceptions for i, k "8,6,9,11" (Blanc)
 			elif x in (8, 6, 9, 11) and y in (7, 5, 10, 12):
-				color = 'black'
+				color = 'grey'
 				# Exceptions for l, j "7,5,10,12" (Blanc)
 			elif x in (7, 5, 10, 12) and y in (8, 6, 9, 11):
-				color = 'black'
+				color = 'grey'
 				# Exceptions for i, k "7,5,10,12" (Noir)
 			elif x in (7, 5, 10, 12) and y in (7, 5, 10, 12):
 				color = 'white'
 				# Default color
 			else:
-				color = 'black' if (x+y) % 2 == 0 else 'white'
+				color = 'grey' if (x+y) % 2 == 0 else 'white'
 
 			pygame.draw.polygon(surf, color, poly)
 
@@ -181,7 +189,7 @@ class GUI:
 			dest = self.coords_to_pos(piece.pos) + self.screen.get_rect().center # Centers the image
 			sprite = PieceSprite(piece, dest.tuple(), self.scale, self.piece_sprites, self.update_group)
 			# No need to save it since it's already in the sprite group
-			# self.pieces[piece] = sprite
+			self.pieces[piece] = sprite
 
 	def load_board(self):
 		# surf = pygame.image.load(os.path.join('assets', 'board.png'))
@@ -387,9 +395,12 @@ class GUI:
 
 		self.cache = cache
 
-	def move(self, src, dst):
-		piece = self.board[src]
-		piece2 = self.board[dst]
+	def move(self, src, dst, board = None ):
+		if board == None:
+			board = self.board
+
+		piece = board[src]
+		piece2 = board[dst]
 
 		print(f'Moving from {src} to {dst}')
 
@@ -397,11 +408,11 @@ class GUI:
 			# Castle
 
 			# TODO - Actually this doesn't work
-			p1 = self.board.coords_to_index(dst)
-			p2 = self.board.coords_to_index(src)
+			p1 = board.coords_to_index(dst)
+			p2 = board.coords_to_index(src)
 
-			self.board[dst] = piece
-			self.board[src] = piece2
+			board[dst] = piece
+			board[src] = piece2
 			piece.pos = p1
 			piece2.pos = p2
 
@@ -411,7 +422,7 @@ class GUI:
 			sprite.move(center)
 			self.update_group.add(sprite)
 		else:
-			self.board[src] = None
+			board[src] = None
 			if piece2 is not None:
 				# TODO - Handle score or whatever
 				piece2.pos = None
@@ -419,9 +430,9 @@ class GUI:
 				sprite = piece2.sprite
 				sprite.kill()
 
-			x, y = self.board.coords_to_index(dst)
+			x, y = board.coords_to_index(dst)
 
-			self.board[dst] = piece
+			board[dst] = piece
 			piece.pos = x, y
 
 		if piece.check_promotion() is True:
