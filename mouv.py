@@ -357,44 +357,52 @@ class Movement:
 				is_check = True	
 		return is_check
 
-	def is_checkmate(self):
+	def is_checkmate(self, team):
 
 		checkmate = False
 
-		list_kings = []
-
-		#find all the kings
+		#find the king
 		for row in self.board:
 			for piece in row:
 				if piece != None:
-					if piece.type == 'K':
-						list_kings.append(piece.pos)
+					if piece.type == 'K' and piece.team == team:
+						king = piece.pos
 
-		
 
 		#wich pieces are making check
-		for king in list_kings:
-			made_check = []
-
-			for row in self.board: 
-				for piece in row:
-					if piece != None and piece.type != 'K' and piece.team != king.team and king in piece.list_moves():
-						made_check.append(piece.pos)
 		
-			#find all the pieces that can move to block the check
-			list_pieces = []
-			for row in self.board:
-				for piece in row:
-					if piece != None and piece.team == king.team:
-						for move in piece.list_moves():
-							new_board = self.board.copy()
-							if not new_board.move(piece.pos, move, board = new_board):
-								list_pieces.append(piece.pos)
+		make_check = []
 
-			if list_pieces != []:
-				return checkmate
-			#else:
-				#test king moves to escape check
+		for row in self.board: 
+			for piece in row:
+				if piece != None and piece.type != 'K' and piece.team != king.team and king in piece.list_moves():
+					make_check.append(piece.pos)
+
+		# the king can move to a safe place ?
+		
+		for move in king.list_moves():
+						new_board = self.board.copy()
+						new_board.move(king.pos, move, board = new_board)
+						if not self.is_check(new_board, team):
+							return checkmate
+
+		#find all the pieces that can move to block the check
+		list_pieces = []
+		for row in self.board:
+			for piece in row:
+				if piece != None and piece.team == king.team:
+					for move in piece.list_moves():
+						new_board = self.board.copy()
+						new_board.move(piece.pos, move, board = new_board)
+						if not self.is_check(new_board, king.team):
+							list_pieces.append(piece.pos)
+
+		if list_pieces != []:
+			checkmate = True
+			return checkmate
+		else:
+			return checkmate
+			
 				
 		
 	#return False #to discard later
