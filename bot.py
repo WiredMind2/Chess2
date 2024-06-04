@@ -281,12 +281,12 @@ class Bot:
 
 		index = Vec2(self.board.coords_to_index(coords))
 		# Convert back from normal 2 player board to a 3 player (rotated /!\) board
-  
+
 		if side == "W":
 			if index.y >= 4:
 				if index.x >= 4:
 					# Just have to move the right side
-					index.x += 4
+					index.y += 4
 
 		elif side == "B":
 			if index.y < 4 and index.x > 4:
@@ -321,6 +321,7 @@ class Bot:
 				c.y += 4
 			else:
 				# Red -> White
+				c.x = 4-c.x
 				c.y = 11 - c.y
 				# c.x = 7 - c.x
 
@@ -385,7 +386,7 @@ class Bot:
 
 				yield i == 3, True
 
-		iterators = dict(zip(map(self.rotate_team, "WBR"), [iterator_white, iterator_black, iterator_red]))
+		iterators = dict(zip("WBR", [iterator_white, iterator_black, iterator_red]))
 
 		out = []
 		for side, iterator in iterators.items():
@@ -538,9 +539,8 @@ if __name__ == "__main__":
 		['W', 'B', 'g6', 'k6'],
 		['W', 'R', 'h5', 'h9'],
 		['B', 'W', 'f3', 'c6'],
-		['B', 'W', 'e5', 'a4'],
 		['W', 'W', 'e5', 'e9'],
-
+		['B', 'W', 'e5', 'a4'],
 	]
 
 	for team, side, org, out in tests:

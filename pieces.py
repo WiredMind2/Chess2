@@ -37,6 +37,9 @@ class Piece(Movement):
 		# Just cause it's easier like this
 		return False
 
+	def copy(self):
+		return self.__class__(self.team, self.pos, self.board)
+
 	@classmethod
 	def from_name(self, name):
 		names = {
@@ -154,7 +157,6 @@ class Pawn(Piece):
 					out.append(adj2[i])
 		
 		return out # returns the list containing the coordinates of the boxes on which it can move
-
 
 	def check_promotion(self):
 		x, y = self.pos
