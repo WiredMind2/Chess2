@@ -545,5 +545,5 @@ def raytracing(pos, poly):
 	return inside
 
 if __name__ == "__main__":
-	gui = GUI({'W': True, 'R': True, 'B': True, })
+	gui = GUI({'W': True, 'R': False, 'B': False, })
 	gui.start()
