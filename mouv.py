@@ -1,5 +1,6 @@
 import string
 from constants import REVERSE, Dir
+import copy
 
 class Movement:
 
@@ -327,34 +328,43 @@ class Movement:
 		return False
 
 	def is_check(self, board, team,  src = None, dest = None ):
+		return False
 		#check if a team is in check
+
 		is_check = False
 		if src == None and dest == None:
 			list_kings = []
-			#find all the kings
+			#find the king
 			for row in board:
 				for piece in row:
 					if piece != None:
-						if piece.type == 'K' and piece.team == team:
-							list_kings.append(piece.pos)
+						if piece.type == 'King' and piece.team == team:
+							list_kings.append(self.index_to_coords(piece.pos))
 
+			#check if the king is in check
 			for king in list_kings:
 				for row in board: 
 					for piece in row:
-						if piece != None and piece.type != 'K' and piece.team != king.team and king in piece.list_moves():
-							is_check = True
+						if piece != None and piece.type != 'King' and piece.team != king.team:
+							for posibilities in piece.list_moves():
+								if posibilities in list_kings:
+									is_check = True
+			return is_check
 		else:
-			
 			list_kings = []
 			#find all the kings
 			for row in board.board:
 				for piece in row:
 					if piece != None:
-						if piece.type == 'K' and piece.team == team:
-							list_kings.append(piece.pos)
+						if piece.type == 'King' and piece.team == team:
+							list_kings.append(self.index_to_coords(piece.pos))
+			
+			new_board = board.copy() #TODO 
+			new_board.move(src, dest, board = new_board)
+			for posibilities in new_board[dest].list_moves:
+				if posibilities in list_kings:
+					is_check = True
 
-			if dest in list_kings:
-				is_check = True	
 		return is_check
 
 	def is_checkmate(self, team):
@@ -365,7 +375,7 @@ class Movement:
 		for row in self.board:
 			for piece in row:
 				if piece != None:
-					if piece.type == 'K' and piece.team == team:
+					if piece.type == 'King' and piece.team == team:
 						king = piece.pos
 
 
@@ -375,7 +385,7 @@ class Movement:
 
 		for row in self.board: 
 			for piece in row:
-				if piece != None and piece.type != 'K' and piece.team != king.team and king in piece.list_moves():
+				if piece != None and piece.type != 'King' and piece.team != king.team and king in piece.list_moves():
 					make_check.append(piece.pos)
 
 		# the king can move to a safe place ?
@@ -402,17 +412,6 @@ class Movement:
 			return checkmate
 		else:
 			return checkmate
-			
-				
-		
-	#return False #to discard later
-							
-
-
-					
-							
-
-
 
 class Vec2:
 	"""Helper to work with coordinates"""
