@@ -4,7 +4,7 @@ Un des défis rencontrés lors de l'élaboration du jeu est la reconnaissance de
 
 Le processus commence par le lancement de rayons depuis une caméra virtuelle à travers chaque pixel de l'image. Ces rayons interagissent avec les objets de la scène. Dans notre cas, le rayon part de la position où le joueur a cliqué et se dirige arbitrairement selon le vecteur y = 0. Le rayon est capable de reconnaître un polygone car chaque paire de sommets d'un polygone a été préalablement enregistrée. Ainsi, le rayon peut détecter lorsqu'il traverse un polygone.
 
-Le théorème important que nous utilisons est le suivant, lorsque le rayon part depuis la position où le joueur a cliqué,
+Le théorème important que nous utilisons est le suivant, lorsque le rayon part depuis la position où le joueur a cliqué :
 - Si le rayon traverse un nombre pair de fois un polygone, c'est que la caméra virtuelle est à l'extérieur, le clic n'est pas dans cette case
 - Si le rayon traverse un nombre impair de fois un polygone, c'est que la caméra virtuelle est dans ce polygone et que par conséquent, le clic est inclut dans cette case. La case connue, le reste du code propose les options de déplacement possible et la faisabilité du coup.
 
