@@ -153,25 +153,25 @@ class GUI:
 			x, y = self.board.coords_to_index(pos)
 			
 			if x in (0, 2, 4, 6):
-				color = 'black' if (y % 2 == 0) else 'white'
+				color = 'grey' if (y % 2 == 0) else 'white'
 				# Conditions pour b, d, f, h
 			elif x in (1, 3, 5, 7):
-				color = 'white' if (y % 2 == 0) else 'black'
+				color = 'white' if (y % 2 == 0) else 'grey'
         		# Exceptions for l, j "8,6,9,11" (Noir)
 			elif x in (8, 6, 9, 11) and y in (8, 6, 9, 11):
 				color = 'white'
  				# Exceptions for i, k "8,6,9,11" (Blanc)
 			elif x in (8, 6, 9, 11) and y in (7, 5, 10, 12):
-				color = 'black'
+				color = 'grey'
 				# Exceptions for l, j "7,5,10,12" (Blanc)
 			elif x in (7, 5, 10, 12) and y in (8, 6, 9, 11):
-				color = 'black'
+				color = 'grey'
 				# Exceptions for i, k "7,5,10,12" (Noir)
 			elif x in (7, 5, 10, 12) and y in (7, 5, 10, 12):
 				color = 'white'
 				# Default color
 			else:
-				color = 'black' if (x+y) % 2 == 0 else 'white'
+				color = 'grey' if (x+y) % 2 == 0 else 'white'
 
 			pygame.draw.polygon(surf, color, poly)
 
@@ -553,5 +553,5 @@ def raytracing(pos, poly):
 	return inside
 
 if __name__ == "__main__":
-	gui = GUI({'W': True, 'R': False, 'B': False, })
+	gui = GUI({'W': True, 'R': True, 'B': True, })
 	gui.start()
