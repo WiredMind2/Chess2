@@ -266,22 +266,39 @@ class Bot:
 	def move_to_index(self, move, side):
 		out = []
 		for coords in (move[:2], move[2:]):
-			coords = self.boardpos_to_index(coords)
+			coords = self.boardpos_to_index(coords, side)
 			out.append(coords)
 
 		return out
 
-	def boardpos_to_index(self, coords):
+	def boardpos_to_index(self, coords, side):
 		if not isinstance(coords, str):
 			coords = coords.decode()
 
-		coords = Vec2(self.board.coords_to_index(coords))
+		index = Vec2(self.board.coords_to_index(coords))
 		# Convert back from normal 2 player board to a 3 player (rotated /!\) board
-		if coords.y > 4 and coords.x >= 4:
-			# Just have to move the right side
-			coords.x += 4
+  
+		if side == "W":
+			if index.y >= 4:
+				if index.x >= 4:
+					# Just have to move the right side
+					index.x += 4
 
-		return self.rotate_coords(coords)
+		elif side == "B":
+			if index.y < 4 and index.x > 4:
+				# Send white half to red side
+				index.x, index.y = 14-index.x, 7-index.y
+
+		elif side == "R":
+			if index.y < 4:
+				if index.x < 4:
+					# Send white half to black side
+					index.x, index.y = 7-index.x, 7-index.y
+			else:
+				index.y += 4
+
+
+		return self.rotate_coords(index)
 
 	def rotate_coords(self, coords, team=None):
 		# Rotate back the coordinates
@@ -501,9 +518,31 @@ if __name__ == "__main__":
 	# 	bot = Bot(board, team)
 		# src, dst = list(map(lambda e: bot.board.index_to_coords(*e), bot.move_to_index('d2d4', team)))
 		# print(team, src, dst)
-  
-	bot = Bot(board, 'B')
-	print(board.index_to_coords(bot.rotate_coords(Vec2(7, 4))))
 
-	print(board.index_to_coords(bot.boardpos_to_index('h5')))
-	pass
+	bots = {team: Bot(board, team) for team in 'WBR'}
+	tests = [ #team, side, org, out
+		['R', 'W', 'c2', 'f11'],
+		['R', 'W', 'c4', 'f9'],
+		['R', 'B', 'c2', 'f11'],
+		['R', 'B', 'c4', 'f9'],
+		['R', 'R', 'f2', 'j11'],
+		['R', 'R', 'f4', 'j9'],
+		['W', 'R', 'b3', 'k6'],
+		['W', 'R', 'b6', 'k10'],
+		['W', 'R', 'b5', 'k9'],
+		['W', 'B', 'g5', 'k5'],
+		['W', 'B', 'g6', 'k6'],
+		['W', 'R', 'h5', 'h9'],
+		['B', 'W', 'f3', 'c6'],
+		['B', 'W', 'e5', 'a4'],
+		['W', 'W', 'e5', 'e9'],
+
+	]
+
+	for team, side, org, out in tests:
+		out2 = bots[team].board.index_to_coords(bots[team].boardpos_to_index(org, side))
+		if out != out2:
+			print(f"Error: {team}, {side}, {org}, {out} != {out2}")
+			pass
+
+	print('All test passed!')

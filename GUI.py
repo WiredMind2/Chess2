@@ -71,7 +71,7 @@ class GUI:
 
 		if button == 1: # Left click
 			piece = self.board[cell]
-			print('Clicked on:', cell, piece)
+			# print('Clicked on:', cell, piece)
 
 			if self.playable_teams[self.team_turn] is True:
 				if piece is not None and piece.team == self.team_turn:
