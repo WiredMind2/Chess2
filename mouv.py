@@ -391,10 +391,10 @@ class Movement:
 		# the king can move to a safe place ?
 		
 		for move in king.list_moves():
-						new_board = self.board.copy()
-						new_board.move(king.pos, move, board = new_board)
-						if not self.is_check(new_board, team):
-							return checkmate
+			new_board = self.board.copy()
+			new_board.move(king.pos, move, board = new_board)
+			if not self.is_check(new_board, team):
+				return checkmate
 
 		#find all the pieces that can move to block the check
 		list_pieces = []
@@ -407,7 +407,7 @@ class Movement:
 						if not self.is_check(new_board, king.team):
 							list_pieces.append(piece.pos)
 
-		if list_pieces != []:
+		if list_pieces == []:
 			checkmate = True
 			return checkmate
 		else:
