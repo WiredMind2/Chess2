@@ -328,7 +328,7 @@ class Movement:
 		return False
 
 	def is_check(self, board, team,  src = None, dest = None ):
-		return False
+		return False 
 		#check if a team is in check
 
 		is_check = False
