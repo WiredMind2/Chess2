@@ -20,16 +20,22 @@ class GUI:
 		self.bots = {}
 		self.update_group = pygame.sprite.Group()
 		self.update_board = True
+		
 
 		self.board = Board()
 		self.piece_sprites = pygame.sprite.Group()
+		self.move_history = []
+		self.scroll_offset = 0
+		self.max_visible_moves = 10  # Number of moves to show at once
+		self.history_surface = None
+		self.scroll_buttons = {}  
 
 	def start(self):
 		pygame.init()
 		pygame.freetype.init()
 		self.screen = pygame.display.set_mode(SCREEN_SIZE)
 		self.clock = pygame.time.Clock()
-		self.font = pygame.font.SysFont('Comic Sans MS', 30) # TODO
+		self.font = pygame.font.SysFont('Comic Sans MS', 15) # TODO
 
 		self.load_board()
 		self.load_pieces()
@@ -64,6 +70,16 @@ class GUI:
 	def handle_click(self, event):
 		button = event.button
 		pos = event.pos
+
+		# Check if scroll buttons are clicked
+		if "up" in self.scroll_buttons and self.scroll_buttons["up"].collidepoint(pos):
+			self.scroll_offset = max(0, self.scroll_offset - 1)
+			self.update_board = True
+			return
+		if "down" in self.scroll_buttons and self.scroll_buttons["down"].collidepoint(pos):
+			self.scroll_offset = min(len(self.move_history) - self.max_visible_moves, self.scroll_offset + 1)
+			self.update_board = True
+			return
 
 		cell = self.pos_to_coords(pos)
 		if cell is None:
@@ -117,11 +133,16 @@ class GUI:
 	def render(self):
 		if self.update_board:
 			self.update_board = False
+			self.screen.fill("lightblue")
 			self.render_board()
+			
 
 			#self.piece_sprites.update()
 			rects = self.piece_sprites.draw(self.screen)
+			
 			self.update_group.empty()
+
+			self.render_history()
 
 			pygame.display.update(rects)
 
@@ -188,6 +209,32 @@ class GUI:
 
 		self.screen.blit(surf, dest)
 
+	def render_history(self):
+		y_offset = 50
+		x_offset = self.board_surf.get_width() + 260
+		
+		# Background surface for move history
+		history_rect = pygame.Rect(x_offset - 10, y_offset - 10, 200, 350)
+		pygame.draw.rect(self.screen, 'white', history_rect)
+		
+		# Display the moves within the scrollable area
+		start_index = self.scroll_offset
+		end_index = min(start_index + self.max_visible_moves, len(self.move_history))
+		for idx in range(start_index, end_index):
+			team, move = self.move_history[idx]
+			text = f"Player {team}: {move}"
+			surf = self.font.render(text, True, (0, 0, 0))
+			self.screen.blit(surf, (x_offset, y_offset + (idx - start_index) * 30))
+			# Scroll buttons
+		self.scroll_buttons["up"] = pygame.Rect(x_offset + 170, y_offset, 15, 15)
+		self.scroll_buttons["down"] = pygame.Rect(x_offset + 170, y_offset + 320, 15, 15)
+		pygame.draw.rect(self.screen, 'grey', self.scroll_buttons["up"])
+		pygame.draw.rect(self.screen, 'grey', self.scroll_buttons["down"])
+		up_arrow = self.font.render("▲", True, (0, 0, 0))
+		down_arrow = self.font.render("▼", True, (0, 0, 0))
+		self.screen.blit(up_arrow, (x_offset + 175, y_offset))
+		self.screen.blit(down_arrow, (x_offset + 175, y_offset + 320))
+
 	def load_pieces(self): 
 		self.pieces = {}
 		for piece in self.board.iterate():
@@ -212,8 +259,8 @@ class GUI:
 		self.scale = dest.width / surf_rect.width
 
 		# self.board_surf = pygame.transform.smoothscale(surf, dest.size)
-		self.board_surf = pygame.Surface(dest.size, pygame.SRCALPHA, 32).convert_alpha()
-		# self.board_surf.fill("purple")
+		self.board_surf = pygame.Surface(dest.size)
+		self.board_surf.fill("lightblue")
 
 	def init_bots(self):
 		for team, playable in self.playable_teams.items():
@@ -459,6 +506,9 @@ class GUI:
 		center = self.coords_to_pos(piece.pos) + self.screen.get_rect().center
 		sprite.move(center)
 		self.update_group.add(sprite)
+		# Add move to history
+		move_str = f"{src} to {dst}"
+		self.move_history.append((piece.team, move_str))
 
 		self.update = True
 
@@ -481,7 +531,7 @@ class GUI:
 
 	def promotion_popup(self):
 		# We're going to override the mainloop here
-		# This is a bad idea, but we're pro here so it's fine.
+		# This is a bad idea, but we're pro here so it's fine.alse
 
 		# Draw popup
 		popup = pygame.Surface(POPUP_SIZE)
