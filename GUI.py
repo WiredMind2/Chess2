@@ -162,7 +162,7 @@ class GUI:
 				# Conditions pour b, d, f, h
 			elif x in (1, 3, 5, 7):
 				color = 'white' if (y % 2 == 0) else 'grey'
-        		# Exceptions for l, j "8,6,9,11" (Noir)
+				# Exceptions for l, j "8,6,9,11" (Noir)
 			elif x in (8, 6, 9, 11) and y in (8, 6, 9, 11):
 				color = 'white'
  				# Exceptions for i, k "8,6,9,11" (Blanc)
@@ -446,8 +446,13 @@ class GUI:
 			piece.pos = x, y
 
 		if piece.check_promotion() is True:
-			choice = self.promotion_popup()
-			piece.promote(choice) # If check_promotion is True then this exists
+			if self.playable_teams[piece.team] is False:
+				# Bot promotion
+				choice = 'Q'
+			else:
+				choice = self.promotion_popup()
+
+			piece.promote(choice) # If check_promotion is True then this function exists
 
 		sprite = piece.sprite
 		
