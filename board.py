@@ -94,7 +94,10 @@ class Board(Movement):
 			Piece|None: The piece at the specified coordinates, or None if the coordinates are out of bounds.
 		"""
 		x, y = self.coords_to_index(coords)
-		return self.board[y][x]
+		try:
+			return self.board[y][x]
+		except IndexError:
+			return None
 
 	def __setitem__(self, coords, value):
 		"""Sets the piece at the specified coordinates on the game board using the square bracket notation.

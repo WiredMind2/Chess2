@@ -264,12 +264,20 @@ class Bot:
 				# SHOULD be safe to ignore, but maybe we should figure out how to recompute a different move?
 
 		if best[1] is None:
-			pass
-		return best[1] or (None, None)
+			# Get a random move
+			for piece in self.board.iterate():
+				if piece.team == self.team:
+					moves = self.get_moves(piece)
+					if moves:
+						best = None, tuple((self.board.coords_to_index(p) for p in (moves[0][:2], moves[0][2:])))
+						break
+		return best[1]
 
 	def move_to_index(self, move, side):
 		out = []
 		for coords in (move[:2], move[2:]):
+			if not coords.decode()[-1].isnumeric():
+				coords = coords[:-1] # Sometim
 			coords = self.boardpos_to_index(coords, side)
 			out.append(coords)
 
@@ -355,7 +363,7 @@ class Bot:
 				for j in range(8):
 					yield 7 - i, j
 				yield False, True
-     
+	 
 			for i in range(4):
 				# Half of white side
 				for j in range(4):
