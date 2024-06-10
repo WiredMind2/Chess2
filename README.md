@@ -1,5 +1,3 @@
-**TODO**
-
 ## Origine du projet
 Notre projet consiste à développer un jeu d'échecs à trois joueurs sur un plateau hexagonal, intégrant les pièces classiques du jeu d'échecs. 
 
