@@ -17,29 +17,23 @@ class Bot:
 		self.team = team
 
 		if platform == "linux" or platform == "linux2":
-			cmd = [
+			self.cmd = [
 				"./stockfish/stockfish-ubuntu-x86-64-sse41-popcnt/stockfish/stockfish-ubuntu-x86-64-sse41-popcnt"
 			]
 		elif platform == "win32":
-			cmd = [
+			self.cmd = [
 				".\stockfish\stockfish-windows-x86-64-sse41-popcnt\stockfish\stockfish-windows-x86-64-sse41-popcnt.exe"
 			]
 		elif platform == "darwin":
 			raise OSError("Désolé, MacOS n'est encore pas supporté pour ce robot.")
 
-		cmd[0] = os.path.abspath(cmd[0])
+		self.cmd[0] = os.path.abspath(self.cmd[0])
 
 		self.bot = None
-		self.bots = {
-			side: Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=STDOUT) for side in "WBR"
-		}
+		self.bots = {}
+		self.start_all_bots()
 
-		self.engine_ready = {side: False for side in "WBR"}
-  
 		self.moves = {side: [] for side in "WBR"}
-
-		for side in "WBR":
-			self.start_bot(side)
 
 		print("Ready!")
 
@@ -65,6 +59,21 @@ class Bot:
 
 		return wrapped
 
+	def start_all_bots(self):
+		if len(self.bots) > 0:
+			# Resetting bots, need to kill the previous ones
+			for side, bot in self.bots.items():
+				bot.kill()
+
+		self.bots = {
+			side: Popen(self.cmd, stdin=PIPE, stdout=PIPE, stderr=STDOUT) for side in "WBR"
+		}
+
+		self.engine_ready = {side: False for side in "WBR"}
+
+		for side in "WBR":
+			self.start_bot(side)
+
 	def start_bot(self, side):
 		init = self.read_command(side)  # Stockfish 16.1 by whatever
 		if b'GLIB' in init:
@@ -80,10 +89,10 @@ class Bot:
 
 		self.wait_for_engine(side, uci=True)
 
-	def parse_commands(self, iterate=False, side=None):
+	def parse_commands(self, iterate=False, side=None, force=False):
 		def iterator():
 			scores = {}
-			while True:
+			while force or self.engine_ready[side] is True:
 				line = self.read_command(side=side)  # id name whatever
 
 				if len(line) == 0:
@@ -161,6 +170,10 @@ class Bot:
 					yield best, scores.get(best[0], (0, False))
 					break
 
+				elif cmd == b'Stockfish':
+					# Bot just got reset, ignore
+					return
+
 				else:
 					print(line)
 					pass
@@ -187,7 +200,7 @@ class Bot:
 	def wait_for_engine(self, side, uci=False):
 		value = "uci" if uci else True
 		while self.engine_ready[side] != value:
-			self.parse_commands(side=side)
+			self.parse_commands(side=side, force=True)
 
 	def get_move(self):
 		boards = self.board_to_fen()
@@ -230,7 +243,15 @@ class Bot:
 
 		best = -math.inf, None
 		while any(running.values()) or not que.empty():
-			data = que.get()
+			try:
+				data = que.get(timeout=MAX_SEARCH_TIME+0.1)
+			except queue.Empty:
+				# Timeout, we probably sent a corrupted FEN string
+				# Since the bot is stuck, we need to reset it
+				self.start_all_bots()
+
+				break
+
 			if data is None:
 				# Thread finished
 				continue

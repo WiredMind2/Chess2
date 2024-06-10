@@ -93,6 +93,8 @@ class Board(Movement):
 		Returns:
 			Piece|None: The piece at the specified coordinates, or None if the coordinates are out of bounds.
 		"""
+		if coords is None:
+			return None
 		x, y = self.coords_to_index(coords)
 		try:
 			return self.board[y][x]

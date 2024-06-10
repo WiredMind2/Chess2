@@ -147,7 +147,7 @@ class Pawn(Piece):
 			if self.board[adj[direc]] == None:
 				# add the one in front of him if it is empty
 				out.append(adj[direc])
-				if coord[1:] == '11' and self.board[adj2[direc]] == None:
+				if coord[1:] == '11' and self.board[adj2.get(direc, None)] == None:
 					# adds the second in front of him if it is empty and it is first movement
 					out.append(adj2[direc])
 

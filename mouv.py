@@ -326,35 +326,33 @@ class Movement:
 
 		return False
 
-	def is_check(self, board, team,  src = None, dest = None ):
+	def is_check(self, board, team, src = None, dest = None ):
 		#check if a team is in check
 		is_check = False
 		if src == None and dest == None:
 			list_kings = []
 			#find all the kings
-			for row in board:
-				for piece in row:
-					if piece != None:
-						if piece.type == 'K' and piece.team == team:
-							list_kings.append(piece.pos)
+			for piece in board.iterate():
+				if piece != None:
+					if piece.type == 'K' and piece.team == team:
+						list_kings.append(piece.pos)
 
 			for king in list_kings:
-				for row in board: 
-					for piece in row:
-						if piece != None and piece.type != 'K' and piece.team != king.team and king in piece.list_moves():
-							is_check = True
+				for piece in board.iterate(): 
+					if piece != None and piece.type != 'K' and piece.team != king.team and king in piece.list_moves():
+						is_check = True
 		else:
 			
 			list_kings = []
 			#find all the kings
-			for row in board.board:
-				for piece in row:
-					if piece != None:
-						if piece.type == 'K' and piece.team == team:
-							list_kings.append(piece.pos)
+			for piece in board.iterate():
+				if piece != None:
+					if piece.type == 'K' and piece.team == team:
+						list_kings.append(piece.pos)
 
 			if dest in list_kings:
 				is_check = True	
+
 		return is_check
 
 	def is_checkmate(self, team):
@@ -362,40 +360,37 @@ class Movement:
 		checkmate = False
 
 		#find the king
-		for row in self.board:
-			for piece in row:
-				if piece != None:
-					if piece.type == 'K' and piece.team == team:
-						king = piece.pos
+		for piece in self.board.iterate():
+			if piece != None:
+				if piece.type == 'K' and piece.team == team:
+					king = piece.pos
 
 
 		#wich pieces are making check
 		
 		make_check = []
 
-		for row in self.board: 
-			for piece in row:
-				if piece != None and piece.type != 'K' and piece.team != king.team and king in piece.list_moves():
-					make_check.append(piece.pos)
+		for piece in self.board.iterate(): 
+			if piece != None and piece.type != 'K' and piece.team != king.team and king in piece.list_moves():
+				make_check.append(piece.pos)
 
 		# the king can move to a safe place ?
 		
 		for move in king.list_moves():
-						new_board = self.board.copy()
-						new_board.move(king.pos, move, board = new_board)
-						if not self.is_check(new_board, team):
-							return checkmate
+			new_board = self.board.copy()
+			new_board.move(king.pos, move, board = new_board)
+			if not self.is_check(new_board, team):
+				return checkmate
 
 		#find all the pieces that can move to block the check
 		list_pieces = []
-		for row in self.board:
-			for piece in row:
-				if piece != None and piece.team == king.team:
-					for move in piece.list_moves():
-						new_board = self.board.copy()
-						new_board.move(piece.pos, move, board = new_board)
-						if not self.is_check(new_board, king.team):
-							list_pieces.append(piece.pos)
+		for piece in self.board.iterate():
+			if piece != None and piece.team == king.team:
+				for move in piece.list_moves():
+					new_board = self.board.copy()
+					new_board.move(piece.pos, move, board = new_board)
+					if not self.is_check(new_board, king.team):
+						list_pieces.append(piece.pos)
 
 		if list_pieces != []:
 			checkmate = True

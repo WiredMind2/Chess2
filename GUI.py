@@ -133,7 +133,7 @@ class GUI:
 	def render(self):
 		if self.update_board:
 			self.update_board = False
-			self.screen.fill("lightblue")
+			# self.screen.fill("lightblue")
 			self.render_board()
 			
 
@@ -259,8 +259,8 @@ class GUI:
 		self.scale = dest.width / surf_rect.width
 
 		# self.board_surf = pygame.transform.smoothscale(surf, dest.size)
-		self.board_surf = pygame.Surface(dest.size)
-		self.board_surf.fill("lightblue")
+		self.board_surf = pygame.Surface(dest.size, pygame.SRCALPHA, 32).convert_alpha()
+		# self.board_surf.fill("lightblue")
 
 	def init_bots(self):
 		for team, playable in self.playable_teams.items():
@@ -517,7 +517,8 @@ class GUI:
 		if piece is None:
 			return False
 
-		if self.board.is_check(self.board, self.board[src].team,  src, dst):
+		if self.board.is_check(self.board, self.board[src].team, src, dst):
+			print(f'Team {self.board[src].team} is in check!')
 			return False
 
 		moves = piece.list_moves()
