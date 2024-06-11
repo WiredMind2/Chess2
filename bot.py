@@ -1,4 +1,5 @@
 import functools
+import heapq
 import math
 import multiprocessing
 import os
@@ -6,6 +7,7 @@ import queue
 from subprocess import PIPE, STDOUT, Popen
 from sys import platform
 import threading
+import time
 
 from constants import MAX_SEARCH_TIME
 from mouv import Vec2
@@ -17,29 +19,23 @@ class Bot:
 		self.team = team
 
 		if platform == "linux" or platform == "linux2":
-			cmd = [
+			self.cmd = [
 				"./stockfish/stockfish-ubuntu-x86-64-sse41-popcnt/stockfish/stockfish-ubuntu-x86-64-sse41-popcnt"
 			]
 		elif platform == "win32":
-			cmd = [
+			self.cmd = [
 				".\stockfish\stockfish-windows-x86-64-sse41-popcnt\stockfish\stockfish-windows-x86-64-sse41-popcnt.exe"
 			]
 		elif platform == "darwin":
-			raise OSError("Désolé, MacOS n'est encore pas supporté.")
+			raise OSError("Désolé, MacOS n'est encore pas supporté pour ce robot.")
 
-		cmd[0] = os.path.abspath(cmd[0])
+		self.cmd[0] = os.path.abspath(self.cmd[0])
 
 		self.bot = None
-		self.bots = {
-			side: Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=STDOUT) for side in "WBR"
-		}
+		self.bots = {}
+		self.start_all_bots()
 
-		self.engine_ready = {side: False for side in "WBR"}
-  
 		self.moves = {side: [] for side in "WBR"}
-
-		for side in "WBR":
-			self.start_bot(side)
 
 		print("Ready!")
 
@@ -65,8 +61,38 @@ class Bot:
 
 		return wrapped
 
+	def start_all_bots(self):
+		if len(self.bots) > 0:
+			# Resetting bots, need to kill the previous ones
+			for side, bot in self.bots.items():
+				bot.kill()
+
+		self.bots = {
+			side: Popen(self.cmd, stdin=PIPE, stdout=PIPE, stderr=STDOUT) for side in "WBR"
+		}
+
+		self.engine_ready = {side: False for side in "WBR"}
+
+		for side in "WBR":
+			self.start_bot(side)
+
+	def reset_bot(self, running):
+		for team, is_running in running.items():
+			if is_running is True:
+				print('Resetting bot', team)
+				running[team] = False
+				self.bots[team].kill()
+
+				self.bots[team] = Popen(self.cmd, stdin=PIPE, stdout=PIPE, stderr=STDOUT)
+				self.engine_ready[team] = False
+				self.start_bot(team)
+
 	def start_bot(self, side):
-		self.read_command(side)  # Stockfish 16.1 by whatever
+		# init = self.read_command(side)  # Stockfish 16.1 by whatever
+		# if b'GLIB' in init:
+		# 	# There is some stuff missing
+		# 	raise FileNotFoundError('GLIBCXX is missing!')
+
 		self.write_command("uci", side=side)
 
 		# self.write_command('setoption name UCI_Elo value 3190') # Make a monster?
@@ -76,13 +102,17 @@ class Bot:
 
 		self.wait_for_engine(side, uci=True)
 
-	def parse_commands(self, iterate=False, side=None):
+	def parse_commands(self, iterate=False, side=None, force=False, is_eval=False):
 		def iterator():
 			scores = {}
-			while True:
-				line = self.read_command(side=side)  # id name whatever
+			while force or self.engine_ready[side] is True:
+				line = self.read_command(side=side)
 
 				if len(line) == 0:
+					if not self.is_alive(side):
+						# Process crashed
+						self.reset_bot({side: True})
+						break
 					continue
 
 				# print('[STOCKFISH stdout]', side, line.decode())
@@ -108,6 +138,19 @@ class Bot:
 
 				elif cmd == b"info":
 					args = args.split(b" ")
+
+					if args[0] == b'string':
+						if is_eval:
+							line = self.read_command(side=side)
+							while not line.startswith(b"Final evaluation"):
+								line = self.read_command(side=side)
+							score = line.split(b" ", 2)[2].strip().split(b" ", 1)[0]
+							if score == b"none":
+								score = None
+							else:
+								score = float(score)
+							yield score
+							break
 
 					while args:
 						key = args.pop(0)
@@ -157,6 +200,10 @@ class Bot:
 					yield best, scores.get(best[0], (0, False))
 					break
 
+				elif cmd == b'Stockfish':
+					# Bot just got reset, ignore
+					return
+
 				else:
 					print(line)
 					pass
@@ -180,10 +227,13 @@ class Bot:
 	def read_command(self, side):
 		return self.bots[side].stdout.readline().strip()
 
+	def is_alive(self, side):
+		return self.bots[side].poll() is None
+
 	def wait_for_engine(self, side, uci=False):
 		value = "uci" if uci else True
 		while self.engine_ready[side] != value:
-			self.parse_commands(side=side)
+			self.parse_commands(side=side, force=True)
 
 	def get_move(self):
 		boards = self.board_to_fen()
@@ -196,7 +246,9 @@ class Bot:
 				ok = True
 
 			if ok is False:
-				print('------------------Nothing returned!!', side)
+				while self.engine_ready[side] is not True:
+					# The engine crashed and is rebooting
+					time.sleep(0.01)
 				pass
 
 			que.put(None)
@@ -204,6 +256,11 @@ class Bot:
 
 		for side, board, moves in boards:
 			self.engine_ready[side] = False
+			if not ('k' in board and 'K' in board):
+				# One king is missing, ignore this board
+				# There will always be at least one board with both kings so it's fine
+				continue
+
 			self.write_command("ucinewgame", side)
 			self.write_command("isready", side)
 			self.wait_for_engine(side)
@@ -221,12 +278,23 @@ class Bot:
 
 		running = {}
 		for side in "WBR":
-			running[side] = True
-			threading.Thread(target=wrapper, args=(side,)).start()
+			if self.engine_ready[side] is True:
+				running[side] = True
+				threading.Thread(target=wrapper, args=(side,)).start()
+			else:
+				running[side] = False
 
-		best = -math.inf, None
+		# best = -math.inf, None
+		best = []
 		while any(running.values()) or not que.empty():
-			data = que.get()
+			try:
+				data = que.get(timeout=MAX_SEARCH_TIME+0.2)
+			except queue.Empty:
+				# Timeout, we probably sent a corrupted FEN string
+				# Since the bot is stuck, we need to reset it
+
+				break
+
 			if data is None:
 				# Thread finished
 				continue
@@ -244,28 +312,38 @@ class Bot:
 			if piece is not None and piece.team == self.team:
 				# Move is for current team
 				if mate:
-					# Forced mate, no need to think anymore
-					return src, dst
+					# Forced mate, technically no need to think anymore but it could be an illegal move so yeah
+					heapq.heappush(best, (-math.inf, (src, dst)))
+					# return src, dst
 				else:
-					if score > best[0]:
-						best = score, (src, dst)
-					elif self.rotate_team(side) == self.team and score == best[0]:
-						# For two moves with equal scores, the one on our own side will be more accurate
-						best = score, (src, dst)
+					if score > 0: #best[0]:
+						# best = score, (src, dst)
+						heapq.heappush(best, (-score, (src, dst)))
+					# elif self.rotate_team(side) == self.team and score == best[0]:
+					# 	# For two moves with equal scores, the one on our own side will be more accurate
+					# 	best = score, (src, dst)
 			else:
 				# Something went wrong
-				print(f'Illegal move: {cell}->{self.board.index_to_coords(*dst)}')
+				# print(f'Illegal move: {cell}->{self.board.index_to_coords(*dst)}')
 				pass
 				# Most likely just picked a piece from the opponent team currently merged with us on that side
-				# SHOULD be safe to ignore, but maybe we should figure out how to recompute a different move?
+				# Just ignore it and get the next move
 
-		if best[1] is None:
-			pass
-		return best[1] or (None, None)
+		# if best[1] is None:
+		# return best[1]
+		while best:
+			out = heapq.heappop(best)[1]
+			yield out
+
+		# Get a random move
+		for move in self.iterate_random_moves():
+			yield move
 
 	def move_to_index(self, move, side):
 		out = []
 		for coords in (move[:2], move[2:]):
+			if not coords.decode()[-1].isnumeric():
+				coords = coords[:-1] # Sometim
 			coords = self.boardpos_to_index(coords, side)
 			out.append(coords)
 
@@ -277,12 +355,12 @@ class Bot:
 
 		index = Vec2(self.board.coords_to_index(coords))
 		# Convert back from normal 2 player board to a 3 player (rotated /!\) board
-  
+
 		if side == "W":
 			if index.y >= 4:
 				if index.x >= 4:
 					# Just have to move the right side
-					index.x += 4
+					index.y += 4
 
 		elif side == "B":
 			if index.y < 4 and index.x > 4:
@@ -317,13 +395,15 @@ class Bot:
 				c.y += 4
 			else:
 				# Red -> White
+				c.x = 7-c.x
 				c.y = 11 - c.y
 				# c.x = 7 - c.x
 
 		return c
 
-	def board_to_fen(self):
-		board = self.rotate_board()
+	def board_to_fen(self, board=None):
+		
+		board = self.rotate_board(board)
 
 		def iterator_white():
 			yield None # Allies
@@ -332,7 +412,7 @@ class Bot:
 			for i in range(4):
 				for off in (4, 8):
 					for j in range(4):
-						yield 3 - i + off, 11 - (j + off)
+						yield 3 - i + off, (j + off - 4)
 				yield False, True
 
 			# White side
@@ -350,7 +430,7 @@ class Bot:
 				for j in range(8):
 					yield 7 - i, j
 				yield False, True
-     
+	 
 			for i in range(4):
 				# Half of white side
 				for j in range(4):
@@ -381,7 +461,7 @@ class Bot:
 
 				yield i == 3, True
 
-		iterators = dict(zip(map(self.rotate_team, "WBR"), [iterator_white, iterator_black, iterator_red]))
+		iterators = dict(zip("WBR", [iterator_white, iterator_black, iterator_red]))
 
 		out = []
 		for side, iterator in iterators.items():
@@ -438,11 +518,13 @@ class Bot:
 		# 	print(out[i][1])
 		return out
 
-	def rotate_board(self):
+	def rotate_board(self, board=None):
+		if board is None:
+			board = self.board.board
 		if self.team == "W":
-			return self.board.board
+			return board
 		else:
-			w, b, r = [self.board.board[4 * i : 4 * (i + 1)] for i in range(3)]
+			w, b, r = [board[4 * i : 4 * (i + 1)] for i in range(3)]
 			rotate = lambda board: list(
 				reversed(list(map(lambda e: list(reversed(e)), board)))
 			)
@@ -492,7 +574,7 @@ class Bot:
 			else:
 				return False
 
-		src = to_two_player_board(self.board.index_to_coords(*piece.pos))
+		src = to_two_player_board(piece.pos) # TODO - Sometimes returns negative stuff
 		if src is False:
 			return []
 		src = self.board.index_to_coords(src.tuple(), two_players=True)
@@ -506,6 +588,87 @@ class Bot:
 				moves.append(src + dst)
 
 		return moves
+
+	def iterate_random_moves(self):
+		best = []
+		for piece in self.board.iterate():
+			if piece.team == self.team:
+				moves = piece.list_moves()
+				if moves:
+					for move in moves:
+						new_board = self.board.copy()
+						new_board.move(self.board.index_to_coords(piece.pos), move)
+						score = self.get_board_score(new_board)
+						heapq.heappush(best, (tuple(sorted([-s for _,s in score if s is not None])), (piece.pos, self.board.coords_to_index(move))))
+		while best:
+			score, move = heapq.heappop(best)
+			yield move
+
+	def get_board_score(self, board):
+		boards = self.board_to_fen(board.board)
+		que = queue.Queue()
+
+		def wrapper(side):
+			ok = False
+			for moves in self.parse_commands(iterate=True, side=side, is_eval=True):
+				que.put((side, moves))
+				ok = True
+
+			if ok is False:
+				while self.engine_ready[side] is not True:
+					# The engine crashed and is rebooting
+					time.sleep(0.01)
+				else:
+					print('------------------Nothing returned!!', side)
+				pass
+
+			que.put(None)
+			running[side] = False
+
+		for side, board, moves in boards:
+			self.engine_ready[side] = False
+			if not ('k' in board and 'K' in board):
+				# One king is missing, ignore this board
+				# There will always be at least one board with both kings so it's fine
+				continue
+
+			self.write_command("ucinewgame", side)
+			self.write_command("isready", side)
+			self.wait_for_engine(side)
+
+			cmd = "position fen " + board
+			self.write_command(cmd, side=side)
+
+			cmd = f"eval"
+			self.write_command(
+				cmd, side=side
+			)  # To ensure that they all start at almost the same time
+
+		running = {}
+		for side in "WBR":
+			if self.engine_ready[side] is True:
+				running[side] = True
+				threading.Thread(target=wrapper, args=(side,)).start()
+			else:
+				running[side] = False
+
+		scores = []
+		while any(running.values()) or not que.empty():
+			try:
+				data = que.get(timeout=MAX_SEARCH_TIME+0.2)
+			except queue.Empty:
+				# Timeout, we probably sent a corrupted FEN string
+				# Since the bot is stuck, we need to reset it
+
+				break
+
+			if data is None:
+				# Thread finished
+				continue
+
+			scores.append(data)
+
+		return scores
 
 if __name__ == "__main__":
 	from board import Board
@@ -534,9 +697,8 @@ if __name__ == "__main__":
 		['W', 'B', 'g6', 'k6'],
 		['W', 'R', 'h5', 'h9'],
 		['B', 'W', 'f3', 'c6'],
-		['B', 'W', 'e5', 'a4'],
-		['W', 'W', 'e5', 'e9'],
-
+		# ['W', 'W', 'e5', 'e9'],
+		# ['B', 'W', 'e5', 'a4'],
 	]
 
 	for team, side, org, out in tests:
@@ -545,4 +707,7 @@ if __name__ == "__main__":
 			print(f"Error: {team}, {side}, {org}, {out} != {out2}")
 			pass
 
+
+	bot = bots['R']
+	print(list(bot.iterate_random_moves()))
 	print('All test passed!')

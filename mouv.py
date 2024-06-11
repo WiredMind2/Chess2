@@ -59,6 +59,9 @@ class Movement:
 		# Renvoie une liste de coordonnées dans une direction donnée
 		# S'arrête lorsque l'on atteint un mur ou une autre pièce, en ignorant la première case
 
+		if not isinstance(coords, str):
+			coords = self.index_to_coords(*coords)
+
 		# Check limits
 		if not self.validate_coordinates(coords):
 			# Could be invalid coordinate, but it can still be mapped to a correct one
@@ -70,23 +73,15 @@ class Movement:
 		else:
 			b = self.board
 
-		if not skipped_first and b[coords] is not None:
-			return []
-
-		# next_cell = next(
-		# 	filter(
-		# 		lambda e: e[0] == direction, 
-		# 		self.get_adjacent(coords)), 
-		# 	[None, None]
-		# )[1]  # equivalent à dict(self.get_adjacent(x, y))[direction] mais un peu plus rapide
-
-		# SAUF que ca gère pas le cas où la direction change en passant le milieu donc pas génial
-
+		# if not skipped_first and b[coords] is not None:
+		# 	return []
+		if origin is not None and b[coords] is not None:
+			return [coords]
 		
 		adj = dict(self.get_adjacent(coords))
 		if origin is not None:
 			for dir, cells in adj.items():
-				if origin in cells:
+				if origin == cells:
 					break
 			else:
 				# wtf?
@@ -100,11 +95,13 @@ class Movement:
 			return [coords]
 
 		out = [coords] + self.get_straight_line(
-			next_cell, direction, skipped_first=True
+			next_cell, direction, skipped_first=True, origin=coords
 		)
 		return out
 
 	def get_adjacent(self, coords):
+		if coords is None:
+			return
 		if isinstance(coords, str):
 			x, y = self.coords_to_index(coords)
 		else:
@@ -328,84 +325,87 @@ class Movement:
 		return False
 
 	def is_check(self, board, team,  src = None, dest = None ):
-		return False 
 		#check if a team is in check
 
-		is_check = False
-		if src == None and dest == None:
-			list_kings = []
+		if src is None and dest is None:
 			#find the king
-			for row in board:
-				for piece in row:
-					if piece != None:
-						if piece.type == 'King' and piece.team == team:
-							list_kings.append(self.index_to_coords(piece.pos))
+			king = None
+			for piece in board.iterate():
+				if piece != None:
+					if piece.type == 'King' and piece.team == team:
+						king = piece # Only one king for each team
+
+			if king is None:
+				# The king was eaten, that's a checkmate
+				return True
 
 			#check if the king is in check
-			for king in list_kings:
-				for row in board: 
-					for piece in row:
-						if piece != None and piece.type != 'King' and piece.team != king.team:
-							for posibilities in piece.list_moves():
-								if posibilities in list_kings:
-									is_check = True
-			return is_check
-		else:
-			list_kings = []
-			#find all the kings
-			for row in board.board:
-				for piece in row:
-					if piece != None:
-						if piece.type == 'King' and piece.team == team:
-							list_kings.append(self.index_to_coords(piece.pos))
-			
-			new_board = board.copy() #TODO 
-			new_board.move(src, dest, board = new_board)
-			for posibilities in new_board[dest].list_moves:
-				if posibilities in list_kings:
-					is_check = True
+			cell = self.index_to_coords(*king.pos)
+			for piece in board.iterate(): 
+				if piece.team != team:
+					if piece.pos is not None:
+						for posibilities in piece.list_moves():
+							if posibilities == cell:
+								return True
 
-		return is_check
+			return False
+
+		else:
+			# piece = board[src]
+			# if piece is not None and piece.type == 'King' and piece.team == team:
+			# 	# Yeah, sometimes the bot tries to eat the king
+			# 	return True
+
+			new_board = board.copy()
+			new_board.move(src, dest)
+			return self.is_check(new_board, team)
+
 
 	def is_checkmate(self, team):
+
+		for piece in self.iterate():
+			for move in piece.list_moves():
+				if piece.team == team:
+					new_board = self.copy()
+					new_board.move(piece.pos, move)
+					if not self.is_check(new_board, team):
+						return False # There is a move that can be made
+
+		return True
 
 		checkmate = False
 
 		#find the king
-		for row in self.board:
-			for piece in row:
-				if piece != None:
-					if piece.type == 'King' and piece.team == team:
-						king = piece.pos
-
+		for piece in self.iterate():
+			if piece != None:
+				if piece.type == 'King' and piece.team == team:
+					king = piece.pos
 
 		#wich pieces are making check
 		
 		make_check = []
 
-		for row in self.board: 
-			for piece in row:
-				if piece != None and piece.type != 'King' and piece.team != king.team and king in piece.list_moves():
-					make_check.append(piece.pos)
+		for piece in self.iterate(): 
+			if piece != None and piece.type != 'King' and piece.team != king.team and king in piece.list_moves():
+				make_check.append(piece.pos)
 
 		# the king can move to a safe place ?
 		
 		for move in king.list_moves():
-			new_board = self.board.copy()
+			new_board = self.copy()
 			new_board.move(king.pos, move, board = new_board)
 			if not self.is_check(new_board, team):
 				return checkmate
 
 		#find all the pieces that can move to block the check
 		list_pieces = []
-		for row in self.board:
-			for piece in row:
-				if piece != None and piece.team == king.team:
-					for move in piece.list_moves():
-						new_board = self.board.copy()
-						new_board.move(piece.pos, move, board = new_board)
-						if not self.is_check(new_board, king.team):
-							list_pieces.append(piece.pos)
+		for piece in self.iterate():
+			if piece != None and piece.team == king.team:
+				for move in piece.list_moves():
+					new_board = self.copy()
+					new_board.move(piece.pos, move, board = new_board)
+					if not self.is_check(new_board, king.team):
+						list_pieces.append(piece.pos)
 
 		if list_pieces == []:
 			checkmate = True
@@ -445,6 +445,11 @@ class Vec2:
 
 	def __iter__(self):
 		return iter((self.x, self.y))
+
+	def __lt__(self, other):
+		if isinstance(other, tuple):
+			other = Vec2(other)
+		return self.x < other.x and self.y < other.y
 
 	def tuple(self):
 		return self.x, self.y

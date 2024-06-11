@@ -10,9 +10,16 @@ class Board(Movement):
 		board (list): A 2D list representing the game board.
 	"""
 
-	def __init__(self):
+	def __init__(self, board=None):
 		super().__init__()
-		self.reset()
+  
+		if board is None:
+			self.reset()
+		else:
+			self.board = board
+
+			for piece in self.iterate():
+				piece.board = self
 
 	def reset(self):
 		"""Resets the game board to its initial state."""
@@ -29,7 +36,6 @@ class Board(Movement):
 				for j, p in enumerate(row):
 					self.board[start - i][j] = Piece.from_name(p)(team, (j, start-i), self)
 
-
 	def iterate(self):
 		"""Iterates over all pieces on the game board.
 
@@ -40,6 +46,39 @@ class Board(Movement):
 			for piece in row:
 				if piece is not None:
 					yield piece
+
+	def copy(self):
+		# Returns a copy of the board (for simulations etc)
+		# This does NOT contains any image, don't use it for render!
+		out = []
+		for i, row in enumerate(self.board):
+			out.append([])
+			for piece in row:
+				if piece is None:
+					out[i].append(None)
+				else:
+					out[i].append(piece.copy())
+
+		return Board(out)
+
+	def move(self, src, dst):
+		# Moves a piece from src to dst
+		# Doesn't check if the move is valid, only use this function for simulations
+
+		piece = self[src]
+
+		self[src] = None
+		x, y = self.coords_to_index(dst)
+
+		self[dst] = piece
+		piece.pos = x, y
+
+	def remove_team(self, team):
+		# Removes all pieces of a team
+		for piece in self.iterate():
+			if piece.team == team:
+				self[piece.pos] = None
+				piece.sprite.kill()
 
 	def get(self, i, j):
 		"""Gets the piece at the specified coordinates on the game board.
@@ -70,6 +109,18 @@ class Board(Movement):
 		else:
 			return None
 
+	def to_tuple(self):
+		# Returns a tuple representation of the board
+		# This is used for hashing the board state
+		out = []
+		for row in self.board:
+			for piece in row:
+				if piece is None:
+					out.append(None)
+				else:
+					out.append((piece.type, piece.team))
+		return tuple(out)
+
 	def __getitem__(self, coords) : 
 		"""Gets the piece at the specified coordinates on the game board using the square bracket notation.
 
@@ -79,8 +130,13 @@ class Board(Movement):
 		Returns:
 			Piece|None: The piece at the specified coordinates, or None if the coordinates are out of bounds.
 		"""
+		if coords is None:
+			return None
 		x, y = self.coords_to_index(coords)
-		return self.board[y][x]
+		try:
+			return self.board[y][x]
+		except IndexError:
+			return None
 
 	def __setitem__(self, coords, value):
 		"""Sets the piece at the specified coordinates on the game board using the square bracket notation.

@@ -1,5 +1,9 @@
 import GUI
+from main_menu import MainMenu
 
 if __name__ == "__main__":
-	gui = GUI.GUI({'W': True, 'R': True, 'B': True, }) # We really need a main menu, help
+	main_menu = MainMenu()
+	teams = main_menu.start()
+ 
+	gui = GUI.GUI(teams)
 	gui.start()
