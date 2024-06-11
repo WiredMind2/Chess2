@@ -1,8 +1,6 @@
 from constants import Dir
 from mouv import Movement
 
-
-
 class Piece(Movement):
 	"""
 	Base class for all chess pieces, handling initialization, representation, and move validation.

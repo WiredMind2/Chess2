@@ -31,3 +31,18 @@ Le vainqueur est le joueur qui parvient à mettre en échec et mat l'un des deux
 - **Anticipation** : Prévoyez non seulement les mouvements de l'adversaire direct, mais aussi ceux du troisième joueur qui peut bouleverser l'équilibre du jeu à tout moment.
 
 Profitez de ce jeu innovant qui combine la réflexion stratégique des échecs classiques avec la complexité et l'interaction d'un jeu à trois joueurs.
+
+### Code provenant de sources externes
+
+**Pygame**: Pygame est une bibliothèque Python permettant de créer des interfaces graphique et des jeux vidéos. Nous l'avons utilisé pour gérer l'affichage de notre jeu.
+**Stockfish**: Stockfish est un moteur d'échec open-source, il est de plus considéré comme le meilleur moteur dans la plupart des catégories. Cependant, il ne fonctionne exclusivement sur des plateaux à deux joueurs, avec des règles classiques. Nous avons donc conçu un algorithme controlant trois moteurs Stockfish par robot pour pouvoir renvoyer un coup optimal à jouer. Cependant, Stockfish nécessite une bibliothèque C++ qui n'est pas disponible sur les ordinateurs de l'INSA, il se désactivera alors automatiquement.
+Toutes les autres bibliothèques que nous avons utilisées font parties de la bibliothèque standard de Python.
+
+
+### Implications
+
+Xuanxiang: 10%
+Antoine: 10%
+Quentin: 10%
+Louis: 20%
+William: 50%

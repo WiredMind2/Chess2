@@ -1,4 +1,3 @@
-import string
 from constants import START_ROWS, Dir
 from mouv import Movement
 from pieces import Piece
@@ -150,32 +149,48 @@ class Board(Movement):
 
 if __name__ == '__main__':
 	b = Board()
-	#b['b3'] = Piece.from_name('P')('R', b.coords_to_index('d3'), b)
-	#b['i7'] = None
-	#b['f1'] = None
-	#b['g1'] = None
-	#print(b['e1'].list_moves())
-	#print(b['e1'].roque())
-	#a = 'j9'
-	#b[a] = Piece.from_name('P')('B', b.coords_to_index(a), b)
-	#print(b[a].list_moves())
+
+	# Test plateau / pions
+	b['b3'] = Piece.from_name('P')('R', b.coords_to_index('d3'), b)
+	b['i7'] = None
+	b['f1'] = None
+	b['g1'] = None
+
+	# Test mouvements
+	print(b['e1'].list_moves())
+	print(b['e1'].roque())
+
+	# Test coordonnées
+	a = 'j9'
+	b[a] = Piece.from_name('P')('B', b.coords_to_index(a), b)
+	print(b.index_to_coords(b.coords_to_index(a)))
+
+	# Test déplacements limités
+	print(b[a].list_moves())
 	print(b.board[0][0].type)
+
+	# Test changement de coordonnées
 	assert b.coords_to_index('e8') == b.coords_to_index('i8')
 	assert b.coords_to_index('i9') == b.coords_to_index('d9')
 	assert b.coords_to_index('a9') == b.coords_to_index('l9')
 
+	# Test cases adjacentes
 	assert dict(b.get_adjacent('i5')) == {Dir.UP: 'j5', Dir.DOWN: 'd5', Dir.RIGHT: 'i9', Dir.LEFT: 'i6'}
 	assert dict(b.get_adjacent('i9')) == {Dir.UP: 'e9', Dir.DOWN: 'j9', Dir.RIGHT: 'i5', Dir.LEFT: 'i10'}
 	assert dict(b.get_adjacent('e4')) == {Dir.UP: 'f4', Dir.DOWN: 'd4', Dir.RIGHT: 'e3', Dir.LEFT: 'e9'}
-	pass
 
+	# Test cases adjacentes aux limites
 	assert dict(b.get_adjacent('i5')) == {Dir.UP: 'j5', Dir.DOWN: 'd5', Dir.RIGHT: 'i9', Dir.LEFT: 'i6'}
 	assert dict(b.get_adjacent('i9')) == {Dir.UP: 'e9', Dir.DOWN: 'j9', Dir.RIGHT: 'i5', Dir.LEFT: 'i10'}
 	assert dict(b.get_adjacent('e4')) == {Dir.UP: 'f4', Dir.DOWN: 'd4', Dir.RIGHT: 'e3', Dir.LEFT: 'e9'}
 	assert dict(b.get_adjacent('h9')) == {Dir.DOWN: 'g9', Dir.RIGHT: 'h4', Dir.LEFT: 'h10'}
+
+	# Test lignes droites
 	assert b.get_straight_line('k9', Dir.UP) == ['k9', 'j9', 'i9', 'e9', 'f9', 'g9', 'h9']
 	assert b.get_straight_line('k5', Dir.DOWN) == ['k5', 'j5', 'i5', 'd5', 'c5', 'b5', 'a5']
 	assert b.get_straight_line('h4', Dir.DOWN) == ['h4', 'g4', 'f4', 'e4', 'd4', 'c4', 'b4', 'a4']
+
+	# Test lignes diagonales
 	assert dict(b.get_adjacent_diagonale('b3')) == {Dir.DOWN: ['a4'], Dir.UP: ['c2'], Dir.LEFT: ['c4'], Dir.RIGHT: ['a2']}
 	assert dict(b.get_adjacent_diagonale('d4')) in ({Dir.DOWN: ['c5'], Dir.UP: ['e3'], Dir.LEFT: ['e9', 'i5'], Dir.RIGHT: ['c3']}, {Dir.DOWN: ['c5'], Dir.UP: ['e3'], Dir.LEFT: ['i5', 'e9'], Dir.RIGHT: ['c3']})
 	pass

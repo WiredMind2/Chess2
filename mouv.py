@@ -1,6 +1,5 @@
 import string
 from constants import REVERSE, Dir
-import copy
 
 class Movement:
 

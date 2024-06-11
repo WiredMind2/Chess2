@@ -69,7 +69,8 @@ class GUI:
 				if len(teams_left) == 1:
 					# Only one team left
 					winner = teams_left[0][0]
-					losers = list('WBR').remove(winner)
+					losers = list('WBR')
+					losers.remove(winner)
 					print(f'Teams {losers[0]} and {losers[1]} have lost!')
 					print(f'Team {winner} has won!')
 					self.running = False

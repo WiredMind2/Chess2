@@ -1,5 +1,4 @@
 import pygame
-import sys
 
 # couleur
 WHITE = (255, 255, 255)

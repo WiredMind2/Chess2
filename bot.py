@@ -88,10 +88,10 @@ class Bot:
 				self.start_bot(team)
 
 	def start_bot(self, side):
-		# init = self.read_command(side)  # Stockfish 16.1 by whatever
-		# if b'GLIB' in init:
-		# 	# There is some stuff missing
-		# 	raise FileNotFoundError('GLIBCXX is missing!')
+		init = self.read_command(side)  # Stockfish 16.1 by whatever
+		if b'GLIB' in init:
+			# There is some stuff missing
+			raise FileNotFoundError('GLIBCXX is missing!')
 
 		self.write_command("uci", side=side)
 
@@ -246,9 +246,9 @@ class Bot:
 				ok = True
 
 			if ok is False:
-				while self.engine_ready[side] is not True:
-					# The engine crashed and is rebooting
-					time.sleep(0.01)
+				# while self.engine_ready[side] is not True:
+				# 	# The engine crashed and is rebooting
+				# 	time.sleep(0.01)
 				pass
 
 			que.put(None)
@@ -503,10 +503,10 @@ class Bot:
 
 			board_repr += " w"  # Always consider that it is white's turn
 
-			# Castle -> TODO
+			# Castle
 			board_repr += " -"  # KQkq
 
-			# En passant -> TODO
+			# En passant
 			board_repr += " -"  # e3
 
 			# Halfmove / Fullmove counters
@@ -574,7 +574,7 @@ class Bot:
 			else:
 				return False
 
-		src = to_two_player_board(piece.pos) # TODO - Sometimes returns negative stuff
+		src = to_two_player_board(piece.pos)
 		if src is False:
 			return []
 		src = self.board.index_to_coords(src.tuple(), two_players=True)
@@ -675,13 +675,17 @@ if __name__ == "__main__":
 
 	board = Board()
 
-	# move = bot.get_move()
- 
-	# for team in 'WBR':
-	# 	bot = Bot(board, team)
-		# src, dst = list(map(lambda e: bot.board.index_to_coords(*e), bot.move_to_index('d2d4', team)))
-		# print(team, src, dst)
+	# Test mouvements du robot
+	for team in 'WBR':
+		bot = Bot(board, team)
+		src, dst = list(map(lambda e: bot.board.index_to_coords(*e), bot.move_to_index('d2d4', team)))
+		print(team, src, dst)
 
+
+	# Test get_move
+	move = bot.get_move() 
+
+	# Test fonction boardpos_to_index: conversion d'un plateau deux joueurs en un plateau trois joueurs
 	bots = {team: Bot(board, team) for team in 'WBR'}
 	tests = [ #team, side, org, out
 		['R', 'W', 'c2', 'f11'],
@@ -697,8 +701,6 @@ if __name__ == "__main__":
 		['W', 'B', 'g6', 'k6'],
 		['W', 'R', 'h5', 'h9'],
 		['B', 'W', 'f3', 'c6'],
-		# ['W', 'W', 'e5', 'e9'],
-		# ['B', 'W', 'e5', 'a4'],
 	]
 
 	for team, side, org, out in tests:
@@ -708,6 +710,8 @@ if __name__ == "__main__":
 			pass
 
 
+	# Test iterate_random_moves()
 	bot = bots['R']
 	print(list(bot.iterate_random_moves()))
+ 
 	print('All test passed!')
