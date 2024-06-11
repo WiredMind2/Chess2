@@ -25,10 +25,13 @@ class GUI:
 		self.board = Board()
 		self.piece_sprites = pygame.sprite.Group()
 		self.move_history = []
+		self.board_history = {}
 		self.scroll_offset = 0
 		self.max_visible_moves = 10  # Number of moves to show at once
 		self.history_surface = None
-		self.scroll_buttons = {}  
+		self.scroll_buttons = {}
+  
+		self.checkmated = {'W': False, 'R': False, 'B': False}
 
 	def start(self):
 		pygame.init()
@@ -60,6 +63,22 @@ class GUI:
 			if not self.update_board: # Let it render once
 				if self.playable_teams[self.team_turn] is False:
 					self.play_bot()
+
+			if self.checkmated[self.team_turn] is True:
+				teams_left = list(filter(lambda e: e[1] is False, self.checkmated.items()))
+				if len(teams_left) == 1:
+					# Only one team left
+					winner = teams_left[0][0]
+					losers = list('WBR').remove(winner)
+					print(f'Teams {losers[0]} and {losers[1]} have lost!')
+					print(f'Team {winner} has won!')
+					self.running = False
+
+				else:
+					teams = list(COLORS)
+					i = teams.index(self.team_turn)
+					self.team_turn = teams[(i+1)%3]
+				
 
 			self.render()
 
@@ -108,21 +127,37 @@ class GUI:
 
 	def play_bot(self):
 		# input('Check')
-		bot = self.bots[self.team_turn] # Should always be defined
-		src, dst = bot.get_move()
-		if src is None: # and dst is None
-			raise Exception(f'Bot {self.team_turn} couldn\'t find a move to play!')
-
-		a, b = self.board.index_to_coords(*src), self.board.index_to_coords(*dst)
-
-		if self.validate_move(a, b):
-			self.move(a, b)
+  
+		okay = self.check_ended()
+		if okay == 'CHECKMATE':
+			self.board.remove_team(self.team_turn)
+			self.checkmated[self.team_turn] = True
+			# Don't play, skip to next team
 		else:
-			print(f'Bot {self.team_turn} played an illegal move?? -> {a, b}')
-			pass
-			# src, dst = bot.get_move()
-			# a, b = self.board.index_to_coords(*src), self.board.index_to_coords(*dst)
-			# pass
+
+			bot = self.bots[self.team_turn] # Should always be defined
+			for src, dst in bot.get_move():
+				if src is None: # and dst is None
+					raise Exception(f'Bot {self.team_turn} couldn\'t find a move to play!')
+
+				a, b = self.board.index_to_coords(*src), self.board.index_to_coords(*dst)
+
+				validation = self.validate_move(a, b)
+				if validation is True:
+					self.move(a, b)
+					break
+				elif validation == 'CHECKMATE':
+					self.board.remove_team(self.team_turn)
+					self.checkmated[self.team_turn] = True
+
+					break # Just skip turn
+				else: # is False
+					# print(f'Bot {self.team_turn} played an illegal move?? -> {a, b}')
+					# Ignore it and play the next move
+					pass
+			else:
+				print(f'Bot {self.team_turn} couldn\'t find a move to play!')
+				pass
 
 		teams = list(COLORS)
 		i = teams.index(self.team_turn)
@@ -133,7 +168,7 @@ class GUI:
 	def render(self):
 		if self.update_board:
 			self.update_board = False
-			self.screen.fill("lightblue")
+			# self.screen.fill("lightblue")
 			self.render_board()
 			
 
@@ -151,6 +186,12 @@ class GUI:
 		dest.center = self.screen.get_rect().center
 
 		surf = self.board_surf.copy()
+
+		screen_size = self.screen.get_rect().size
+		if self.bg.get_rect().size != screen_size:
+			pygame.transform.scale(self.bg_full, screen_size, self.bg)
+
+		self.screen.blit(self.bg, (0, 0))
 
 		cells = []
 		if self.selected is not None:
@@ -177,7 +218,7 @@ class GUI:
 				# Conditions pour b, d, f, h
 			elif x in (1, 3, 5, 7):
 				color = 'white' if (y % 2 == 0) else 'grey'
-        		# Exceptions for l, j "8,6,9,11" (Noir)
+				# Exceptions for l, j "8,6,9,11" (Noir)
 			elif x in (8, 6, 9, 11) and y in (8, 6, 9, 11):
 				color = 'white'
  				# Exceptions for i, k "8,6,9,11" (Blanc)
@@ -238,8 +279,13 @@ class GUI:
 			self.pieces[piece] = sprite
 
 	def load_board(self):
-		# surf = pygame.image.load(os.path.join('assets', 'board.png'))
 		s_rect = self.screen.get_rect()
+
+
+		# surf = pygame.image.load(os.path.join('assets', 'board.png'))
+		self.bg_full = pygame.image.load(os.path.join('assets', 'background.png'))
+
+		self.bg = pygame.transform.scale(self.bg_full, s_rect.size)
 
 		surf_rect = pygame.Rect(0, 0, 916, 792)
 		# dest = surf.get_rect().fit(s_rect)
@@ -248,15 +294,21 @@ class GUI:
 		self.scale = dest.width / surf_rect.width
 
 		# self.board_surf = pygame.transform.smoothscale(surf, dest.size)
-		self.board_surf = pygame.Surface(dest.size)
-		self.board_surf.fill("lightblue")
+		self.board_surf = pygame.Surface(dest.size, pygame.SRCALPHA, 32).convert_alpha()
+		# self.board_surf.fill("lightblue")
 
 	def init_bots(self):
 		for team, playable in self.playable_teams.items():
 			if not playable:
-				bot = Bot(self.board, team)
-				self.bots[team] = bot
-				print(f'Initialized bot for {team} team')
+				try:
+					bot = Bot(self.board, team)
+				except FileNotFoundError:
+					# Bots couldn't find some files cuz INSA computers sucks
+					print("WARNING: GLIBCXX is missing, the bot cannot start. Please install the required libraries ASAP!")
+					self.playable_teams[team] = True
+				else:
+					self.bots[team] = bot
+					print(f'Initialized bot for {team} team')
 
 	@cache
 	def coords_to_pos(self, coords):
@@ -442,26 +494,40 @@ class GUI:
 		piece = board[src]
 		piece2 = board[dst]
 
-		print(f'Moving from {src} to {dst}')
+		print(f'{piece.team}: Moving from {src} to {dst}')
 
-		if piece.type == 'K' and piece2.type == 'R' and piece.team == piece2.team:
+		is_castle = False
+		if piece.type == 'King':
 			# Castle
 
-			# TODO - Actually this doesn't work
-			p1 = board.coords_to_index(dst)
-			p2 = board.coords_to_index(src)
+			p1 = Vec2(board.coords_to_index(dst))
+			p2 = Vec2(board.coords_to_index(src))
+			delta = p1-p2
 
-			board[dst] = piece
-			board[src] = piece2
-			piece.pos = p1
-			piece2.pos = p2
+			if abs(delta.x) >= 2:
+				# Castle
+				# If this move happens then it must has been validated already so no need to check again
+				is_castle = True
 
-			sprite = piece2.sprite
-			
-			center = self.coords_to_pos(piece2.pos) + self.screen.get_rect().center
-			sprite.move(center)
-			self.update_group.add(sprite)
-		else:
+				sign = 1 if delta.x > 0 else -1
+				off = Vec2(sign, 0)
+				piece2 = board[p1 + (off if sign > 0 else off*2)]
+
+				board[p1 + (off if sign > 0 else off*2)] = None
+				board[p2] = None
+
+				board[p1] = piece
+				board[p2+off] = piece2
+				piece.pos = p1.tuple()
+				piece2.pos = (p2+off).tuple()
+
+				sprite = piece2.sprite
+				
+				center = self.coords_to_pos(piece2.pos) + self.screen.get_rect().center
+				sprite.move(center)
+				self.update_group.add(sprite)
+
+		if is_castle is False:
 			board[src] = None
 			if piece2 is not None:
 				# TODO - Handle score or whatever
@@ -476,8 +542,13 @@ class GUI:
 			piece.pos = x, y
 
 		if piece.check_promotion() is True:
-			choice = self.promotion_popup()
-			piece.promote(choice) # If check_promotion is True then this exists
+			if self.playable_teams[piece.team] is False:
+				# Bot promotion
+				choice = 'Q'
+			else:
+				choice = self.promotion_popup()
+
+			piece.promote(choice) # If check_promotion is True then this function exists
 
 		sprite = piece.sprite
 		
@@ -488,6 +559,25 @@ class GUI:
 		move_str = f"{src} to {dst}"
 		self.move_history.append((piece.team, move_str))
 
+		repr = self.board.to_tuple()
+		if repr in self.board_history:
+			self.board_history[repr] += 1
+   
+			if self.board_history[repr] >= 3:
+				print('Draw by repetition!')
+				self.running = False
+				winners, losers = [], []
+				for team, checkmated in self.checkmated.items():
+					if checkmated:
+						losers.append(team)
+					else:
+						winners.append(team)
+				if len(losers) == 1:
+					print(f'Team {losers[0]} has lost!')
+				print(f'Teams {", ".join(winners)} are tied!')
+		else:
+			self.board_history[repr] = 1
+
 		self.update = True
 
 	def validate_move(self, src, dst):
@@ -495,11 +585,13 @@ class GUI:
 		if piece is None:
 			return False
 
-		if self.board.is_check(self.board, self.board[src].team,  src, dst):
-			return False
-
 		moves = piece.list_moves()
 		if dst in moves:
+
+			check_okay = self.check_ended(src, dst, log=False)
+			if check_okay is not True:
+				return check_okay
+
 			piece2 = self.board[dst]
 			if piece2 is not None and piece2.team == piece.team and not (piece.type == 'K' and piece2.type == 'R'):
 				return False
@@ -507,9 +599,25 @@ class GUI:
 
 		return False
 
+	def check_ended(self, src=None, dst=None, log=True):
+		if src is not None:
+			team = self.board[src].team # Not sure if this is needed but whatever
+		else:
+			team = self.team_turn
+
+		if self.board.is_check(self.board, team, src, dst):
+			if self.board.is_checkmate(team):
+				if log:
+					print(f'Team {team} is in checkmate!')
+				return 'CHECKMATE'
+			else:
+				if log:
+					print(f'Team {team} is in check!')
+				return False
+		return True
+
 	def promotion_popup(self):
 		# We're going to override the mainloop here
-		# This is a bad idea, but we're pro here so it's fine.alse
 
 		# Draw popup
 		popup = pygame.Surface(POPUP_SIZE)
@@ -602,5 +710,5 @@ def raytracing(pos, poly):
 	return inside
 
 if __name__ == "__main__":
-	gui = GUI({'W': True, 'R': True, 'B': True, })
+	gui = GUI({'W': False, 'R': False, 'B': False, })
 	gui.start()
