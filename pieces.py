@@ -87,15 +87,18 @@ class Pawn(Piece):
 				direc = Dir.RIGHT
 			adj = dict(self.get_adjacent(coord))
 			# finds the boxes adjacent to his
-			adj2 = dict(self.get_adjacent(adj[direc]))
-			# find the boxes adjacent to the one in front of him
+			if direc not in adj:
+				adj2 = {}
+			else:
+				adj2 = dict(self.get_adjacent(adj[direc]))
+				# find the boxes adjacent to the one in front of him
 
-			if self.board[adj[direc]] == None:
-				# add the one in front of him if it is empty
-				out.append(adj[direc])
-				if coord[1] == '2' and self.board[adj2[direc]] == None:
-					# adds the second in front of him if it is empty and it is first movement
-					out.append(adj2[direc])
+				if self.board[adj[direc]] == None:
+					# add the one in front of him if it is empty
+					out.append(adj[direc])
+					if coord[1] == '2' and direc in adj2 and self.board[adj2[direc]] == None:
+						# adds the second in front of him if it is empty and it is first movement
+						out.append(adj2[direc])
 
 			for i in (Dir.UP, Dir.DOWN):
 				# adds diagonal squares in front of him if he can eat pieces
@@ -114,15 +117,18 @@ class Pawn(Piece):
 				direc = Dir.LEFT
 			adj = dict(self.get_adjacent(coord))
 			# finds the boxes adjacent to his
-			adj2 = dict(self.get_adjacent(adj[direc]))
-			# find the boxes adjacent to the one in front of him
+			if direc not in adj:
+				adj2 = {}
+			else:
+				adj2 = dict(self.get_adjacent(adj[direc]))
+				# find the boxes adjacent to the one in front of him
 
-			if self.board[adj[direc]] == None:
-				# add the one in front of him if it is empty
-				out.append(adj[direc])
-				if coord[1:] == '7' and self.board[adj2[direc]] == None:
-					# adds the second in front of him if it is empty and it is first movement
-					out.append(adj2[direc])
+				if self.board[adj[direc]] == None:
+					# add the one in front of him if it is empty
+					out.append(adj[direc])
+					if coord[1:] == '7' and direc in adj2 and self.board[adj2[direc]] == None:
+						# adds the second in front of him if it is empty and it is first movement
+						out.append(adj2[direc])
 
 			for i in (Dir.UP, Dir.DOWN):
 				# adds diagonal squares in front of him if he can eat pieces
@@ -141,15 +147,18 @@ class Pawn(Piece):
 				direc = Dir.RIGHT
 			adj = dict(self.get_adjacent(coord))
 			# finds the boxes adjacent to his
-			adj2 = dict(self.get_adjacent(adj[direc]))
-			# find the boxes adjacent to the one in front of him
+			if direc not in adj:
+				adj2 = {}
+			else:
+				adj2 = dict(self.get_adjacent(adj[direc]))
+				# find the boxes adjacent to the one in front of him
 
-			if self.board[adj[direc]] == None:
-				# add the one in front of him if it is empty
-				out.append(adj[direc])
-				if coord[1:] == '11' and self.board[adj2.get(direc, None)] == None:
-					# adds the second in front of him if it is empty and it is first movement
-					out.append(adj2[direc])
+				if self.board[adj[direc]] == None:
+					# add the one in front of him if it is empty
+					out.append(adj[direc])
+					if coord[1:] == '11' and direc in adj2 and self.board[adj2[direc]] == None:
+						# adds the second in front of him if it is empty and it is first movement
+						out.append(adj2[direc])
 
 			for i in (Dir.UP, Dir.DOWN):
 				# adds diagonal squares in front of him if he can eat pieces
@@ -166,8 +175,8 @@ class Pawn(Piece):
 
 	def promote(self, choice):
 		"""
-        Promote the Pawn if it reaches the end of the board.
-        """
+		Promote the Pawn if it reaches the end of the board.
+		"""
 		if choice not in 'QNRB':
 			raise ValueError('Invalid promotion choice') # If you see this, then someone tried to be smart and failed
 
@@ -188,33 +197,7 @@ class Rook(Piece):
 	def list_moves(self):
 		"""
 		returns a list of boxes on which the rook can move
-        """
-		def recur(pos, dir): # Not used anymore
-
-			"""
-			Recursively find valid moves in a given direction.
-
-			Args:
-				pos (tuple): The current position of the rook.
-				dir (Dir): The direction to check for moves.
-
-			Returns:
-				list: Valid moves in the given direction.
-			"""
-
-			adjs = dict(self.get_adjacent(pos))
-			adj = adjs.get(dir, None)
-			if adj is not None:
-				if self.board[adj] is None:
-					return [adj] + recur(adj, dir)  # Continue in the same direction
-				elif self.board[adj].team != self.team:
-					return [adj] # Capture an opponent's piece
-			return [] # No further moves in this direction
-
-		# out = []
-		# for dir in list(Dir):
-		# 	out += recur(self.pos, dir) # Check all directions
-		# return out
+		"""
 
 		out = []
 		for dir in list(Dir): # Get all possible diagonal moves
@@ -224,10 +207,8 @@ class Rook(Piece):
 
 		out2 = []
 		for i in out:
-			if i != k and self.board[i] == None:
-				out2.append(i) # Add empty squares
-			elif i != k and self.board[k].team != self.board[i].team: 
-				out2.append(i) # Add squares occupied by opponent's pieces
+			if i != k and (self.board[i] == None or self.team != self.board[i].team):
+				out2.append(i) # Add empty squares or squares occupied by opponent's pieces
 		return out2
 
 class King(Piece):
@@ -280,42 +261,42 @@ class King(Piece):
 			if (
 				self.board["f1"] == None
 				and self.board["g1"] == None
-				and self.board["h1"].team == "W"
+				and self.board["h1"] is not None and self.board["h1"].team == "W"
 			):
 				out.append("g1")
 			if (
 				self.board["d1"] == None
 				and self.board["c1"] == None
 				and self.board["b1"] == None
-				and self.board["a1"].team == "W"
+				and self.board["a1"] is not None and self.board["a1"].team == "W"
 			):
 				out.append("c1")
 		elif self.board[coord].team == "R" and coord == "i12":
 			if (
 				self.board["f12"] == None
 				and self.board["g12"] == None
-				and self.board["h12"].team == "R"
+				and self.board["h12"] is not None and self.board["h12"].team == "R"
 			):
 				out.append("g12")
 			if (
 				self.board["i12"] == None
 				and self.board["j12"] == None
 				and self.board["k12"] == None
-				and self.board["l12"].team == "R"
+				and self.board["l12"] is not None and self.board["l12"].team == "R"
 			):
 				out.append("j12")
 		elif self.board[coord].team == "B" and coord == "d8":
 			if (
 				self.board["c8"] == None
 				and self.board["b8"] == None
-				and self.board["a8"].team == "B"
+				and self.board["a8"] is not None and self.board["a8"].team == "B"
 			):
 				out.append("b8")
 			if (
 				self.board["i8"] == None
 				and self.board["j8"] == None
 				and self.board["k8"] == None
-				and self.board["l8"].team == "B"
+				and self.board["l8"] is not None and self.board["l8"].team == "B"
 			):
 				out.append("j8")
 
@@ -323,12 +304,12 @@ class King(Piece):
 
 class Queen(Piece):
 	"""
-    Class representing a Queen piece.
-    """
+	Class representing a Queen piece.
+	"""
 	def list_moves(self):
 		"""
 		returns a list of boxes on which the queen can move
-        """
+		"""
 		x,y = self.pos
 
 		out = self.from_name("R")(f'{self.team}', (x, y), self.board).list_moves() # uses the rook’s list_move function 
@@ -337,12 +318,12 @@ class Queen(Piece):
 	
 class Bishop(Piece):
 	"""
-    Class representing a Bishop piece.
-    """
+	Class representing a Bishop piece.
+	"""
 	def list_moves(self):
 		"""
 		returns a list of boxes on which the bishop can move
-        """
+		 """
 		out = []
 		for dir in list(Dir): # Get all possible diagonal moves
 			out += self.get_diagonal_line(self.pos, dir)

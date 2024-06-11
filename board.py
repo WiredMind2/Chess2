@@ -18,6 +18,9 @@ class Board(Movement):
 		else:
 			self.board = board
 
+			for piece in self.iterate():
+				piece.board = self
+
 	def reset(self):
 		"""Resets the game board to its initial state."""
 		self.board = [[None for _ in range(8)] for _ in range(12)] # Number, then letter -> /!\ reverse
@@ -51,9 +54,31 @@ class Board(Movement):
 		for i, row in enumerate(self.board):
 			out.append([])
 			for piece in row:
-				out[i].append(piece.copy())
+				if piece is None:
+					out[i].append(None)
+				else:
+					out[i].append(piece.copy())
 
 		return Board(out)
+
+	def move(self, src, dst):
+		# Moves a piece from src to dst
+		# Doesn't check if the move is valid, only use this function for simulations
+
+		piece = self[src]
+
+		self[src] = None
+		x, y = self.coords_to_index(dst)
+
+		self[dst] = piece
+		piece.pos = x, y
+
+	def remove_team(self, team):
+		# Removes all pieces of a team
+		for piece in self.iterate():
+			if piece.team == team:
+				self[piece.pos] = None
+				piece.sprite.kill()
 
 	def get(self, i, j):
 		"""Gets the piece at the specified coordinates on the game board.
@@ -83,6 +108,18 @@ class Board(Movement):
 			return self.board[y][x].type
 		else:
 			return None
+
+	def to_tuple(self):
+		# Returns a tuple representation of the board
+		# This is used for hashing the board state
+		out = []
+		for row in self.board:
+			for piece in row:
+				if piece is None:
+					out.append(None)
+				else:
+					out.append((piece.type, piece.team))
+		return tuple(out)
 
 	def __getitem__(self, coords) : 
 		"""Gets the piece at the specified coordinates on the game board using the square bracket notation.
