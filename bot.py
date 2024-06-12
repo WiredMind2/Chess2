@@ -246,9 +246,7 @@ class Bot:
 				ok = True
 
 			if ok is False:
-				while self.engine_ready[side] is not True:
-					# The engine crashed and is rebooting
-					time.sleep(0.01)
+				
 				pass
 
 			que.put(None)
